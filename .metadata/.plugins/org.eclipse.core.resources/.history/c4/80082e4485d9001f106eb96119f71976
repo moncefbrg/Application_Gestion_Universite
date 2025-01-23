@@ -1,0 +1,9 @@
+package com.example.demo.services.fichierexcel;
+
+import java.util.List;
+
+public interface IFichierExcelService {
+	public void formatColonnes(int nbr) throws Exception;
+	public void formatTypeDonnee(String type) throws Exception;
+
+}

@@ -1,0 +1,5 @@
+package com.example.demo.services.Etudiant;
+
+public interface IEtudiantService {
+
+}

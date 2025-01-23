@@ -14,9 +14,8 @@ import lombok.NoArgsConstructor;
 @Entity @Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class Etudiant {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column()
+	@Column(unique=true)
     private String cne;
     private String nom;
     private String prenom;

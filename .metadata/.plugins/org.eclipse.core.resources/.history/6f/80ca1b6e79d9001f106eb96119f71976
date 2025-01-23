@@ -1,0 +1,13 @@
+package com.example.demo.services.Etudiant;
+
+import java.io.File;
+
+import com.example.demo.entities.Etudiant;
+
+public interface IEtudiantService {
+	public void inscrir(File fichier);
+	public int checkFormat(File fichier);
+	public Etudiant chercherEtudiantById(Long id);
+	public Etudiant chercherEtudiant(String cne);
+
+}

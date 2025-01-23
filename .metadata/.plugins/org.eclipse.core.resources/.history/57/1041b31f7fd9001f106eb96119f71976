@@ -1,0 +1,138 @@
+package com.example.demo.services.Etudiant;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import com.example.demo.entities.Etudiant;
+
+public class EtudiantServiceimpl implements IEtudiantService{
+
+	@Override
+	public boolean inscrir(File fichier) {
+		// TODO Auto-generated method stub
+		return false;
+		
+	}
+
+	@Override
+	public String checkFormat(File fichier)throws Exception {
+		try {
+            // Ouverture du fichier Excel
+            FileInputStream fis = new FileInputStream(fichier);
+            Workbook workbook = new XSSFWorkbook(fis);
+            
+            // Récupérer la première feuille
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Vérifier le nombre de colonnes
+            Row firstRow = sheet.getRow(0);
+            int expectedColumnCount = 6;  // Nombre attendu de colonnes
+            int nbrReelColonnes=firstRow.getPhysicalNumberOfCells();
+            if (nbrReelColonnes != expectedColumnCount) {
+                workbook.close();
+                 
+            }
+
+            // Vérifier les types de données des colonnes
+            boolean validDataTypes = checkDataTypes(sheet);
+            if (!validDataTypes) {
+                workbook.close();
+                return ("le nombre de colonnes est :"+nbrReelColonnes); // Code d'erreur pour types de données incorrects
+            }
+
+            workbook.close();
+            return ("le nombre de colonnes est :"+nbrReelColonnes); // Tout est valide
+
+        } catch (Exception e) {
+            e.printStackTrace();
+             // Erreur lors de l'ouverture du fichier
+        }
+		return null;
+    }
+
+    // Vérifier les types de données dans les colonnes
+    private boolean checkDataTypes(Sheet sheet) {
+        Iterator<Row> rowIterator = sheet.iterator();
+        rowIterator.next();  // Ignorer la première ligne (en-tête)
+
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+
+            // Vérifier la première colonne (doit être une chaîne de caractères)
+            Cell firstCell = row.getCell(0);  // Supposons que la première colonne soit du texte
+            if (firstCell != null && firstCell.getCellType() != CellType.STRING) {
+                System.out.println("Erreur : la première colonne doit contenir des chaînes de caractères.");
+                return false;
+            }
+
+            // Vérifier la deuxième colonne (doit être un nombre)
+            Cell secondCell = row.getCell(1);  // Supposons que la deuxième colonne soit un nombre
+            if (secondCell != null && secondCell.getCellType() != CellType.NUMERIC) {
+                System.out.println("Erreur : la deuxième colonne doit contenir des nombres.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+	@Override
+	public Etudiant chercherEtudiantById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Etudiant chercherEtudiant(String cne,String nom,String prenom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean checkExistanceNiveau(Long id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean checkNiveau() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean inscription(List<Etudiant> liste) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean reinscription(List<Etudiant> liste) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Etudiant modifierEtudiant(String cne, String nom, String prenom, Long niveau) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Etudiant> consulterClasse() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public File exporter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

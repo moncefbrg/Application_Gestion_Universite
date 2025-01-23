@@ -1,0 +1,33 @@
+package com.example.demo.services.Etudiant;
+
+import java.io.File;
+
+import com.example.demo.entities.Etudiant;
+
+public class EtudiantServiceimpl implements IEtudiantService{
+
+	@Override
+	public void inscrir(File fichier) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int checkFormat(File fichier) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Etudiant chercherEtudiantById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Etudiant chercherEtudiant(String cne) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

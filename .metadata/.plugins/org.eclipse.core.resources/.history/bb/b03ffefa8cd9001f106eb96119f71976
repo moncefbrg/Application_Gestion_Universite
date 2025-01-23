@@ -1,0 +1,86 @@
+package com.example.demo.services.Etudiant;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
+import java.util.List;
+
+import com.example.demo.entities.Etudiant;
+import com.example.demo.services.fichierexcel.IFichierExcelService;
+
+public class EtudiantServiceimpl implements IEtudiantService{
+
+	@Override
+	public boolean inscrir(File fichier) {
+		// TODO Auto-generated method stub
+		return false;
+		
+	}
+
+	@Override
+	public String checkFormat(File fichier)throws Exception {
+		try {
+			IFichierExcelService.formatColonnes(fichier,6);
+		}catch() {}
+		return null;
+    }
+
+
+
+
+	@Override
+	public Etudiant chercherEtudiantById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Etudiant chercherEtudiant(String cne,String nom,String prenom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean checkExistanceNiveau(Long id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean checkNiveau() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean inscription(List<Etudiant> liste) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean reinscription(List<Etudiant> liste) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Etudiant modifierEtudiant(String cne, String nom, String prenom, Long niveau) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Etudiant> consulterClasse() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public File exporter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

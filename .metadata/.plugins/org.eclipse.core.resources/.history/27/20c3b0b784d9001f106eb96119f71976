@@ -1,0 +1,9 @@
+package com.example.demo.services.fichierexcel;
+
+import java.util.List;
+
+public interface IFichierExcelService {
+	public boolean formatColonnes(int nbr);
+	public boolean formatTypeDonnee(String type);
+
+}
