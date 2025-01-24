@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,52 +26,16 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	private INiveau iNiveau;
 	@Transactional
 	@Override
-	public boolean inscrire(File fichier) {
-	    // Liste des types de colonnes attendues dans le fichier
-	    List<String> liste = new ArrayList<>(Arrays.asList("NUMERIC", "STRING", "STRING", "STRING", "NUMERIC", "STRING"));
-	    
-	    return inscription(fichier,liste);
+	public boolean inscrire(File fichier,List<String> listeTypeColonnes,int nbrColonnes) {
+	    return inscription(fichier,listeTypeColonnes,nbrColonnes);
 	}
 
-	/**
-	 * Lit les données d'une ligne du fichier Excel.
-	 */
-	private List<String> lireLigne(Row row) {
-	    List<String> ligneData = new ArrayList<>();
-	    for (int colonneIndex = 0; colonneIndex < 6; colonneIndex++) { // 6 colonnes : ID Etudiant, CNE, NOM, PRENOM, ID NIVEAU ACTUEL, TYPE
-	        Cell cell = row.getCell(colonneIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-	        ligneData.add(lireValeurCellule(cell));
-	    }
-	    return ligneData;
-	}
-
-	/**
-	 * Lit la valeur d'une cellule en fonction de son type.
-	 */
-	private String lireValeurCellule(Cell cell) {
-	    switch (cell.getCellType()) {
-	        case STRING:
-	            return cell.getStringCellValue();
-	        case NUMERIC:
-	            if (DateUtil.isCellDateFormatted(cell)) {
-	                return cell.getDateCellValue().toString();
-	            } else {
-	                return String.valueOf((int) cell.getNumericCellValue());
-	            }
-	        case BOOLEAN:
-	            return String.valueOf(cell.getBooleanCellValue());
-	        case BLANK:
-	            return ""; // Cellule vide
-	        default:
-	            throw new IllegalStateException("Type de cellule non géré : " + cell.getCellType());
-	    }
-	}
 
 	/**
 	 * Crée et sauvegarde un étudiant à partir des données d'une ligne.
 	 */
-	@Transactional
-	private boolean creerEtSauvegarderEtudiant(List<String> ligneData) {
+	@Override @Transactional
+	public boolean creerEtSauvegarderEtudiantFromExcel(List<String> ligneData) {
 	    try {
 	        // Récupérer les données de la ligne
 	        Long idEtudiant = Long.parseLong(ligneData.get(0)); // ID Etudiant (Long)
@@ -140,54 +102,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	    }
 	}
 
-	@Override
-	public boolean checkFormat(File fichier, List<String> liste) {
-	    try (FileInputStream fis = new FileInputStream(fichier);
-	         Workbook workbook = new XSSFWorkbook(fis)) {
-
-	        // Vérifier le format des colonnes
-	        if (!ifichierexcelservice.formatColonnes(fichier, 6)) {
-	            // Si les colonnes ne respectent pas le format, retourner false
-	            return false;
-	        }
-
-	        Sheet sheet = workbook.getSheetAt(0);  // On travaille avec la première feuille
-
-	        // Parcours des lignes à partir de la ligne 2 (index 1 dans Excel)
-	        for (int ligneIndex = 1; ligneIndex <= sheet.getLastRowNum(); ligneIndex++) {
-	            Row row = sheet.getRow(ligneIndex);
-
-	            if (row == null) continue;  // Si la ligne est vide, on passe à la suivante
-
-	            // Parcours des colonnes de chaque ligne
-	            for (int colIndex = 0; colIndex < liste.size(); colIndex++) {
-	                // Récupérer le type attendu depuis la liste
-	                String typeAttendu = liste.get(colIndex);
-
-	                // Récupérer le type réel de la cellule
-	                String typeCellule = ifichierexcelservice.formatTypeDonnee(fichier, colIndex, ligneIndex);
-
-	                // Comparer le type attendu avec le type réel
-	                if (!typeAttendu.equals(typeCellule)) {
-	                    // Si les types ne correspondent, retourner false
-	                    System.err.println("Erreur à la ligne " + (ligneIndex + 1) + ", colonne " + (colIndex + 1) +
-	                            ": Attendu '" + typeAttendu + "', trouvé '" + typeCellule + "'.");
-	                    return false;
-	                }
-	            }
-	        }
-
-	        // Si tout est correct, retourner true
-	        return true;
-
-	    } catch (Exception e) {
-	        // Si une exception est lancée, log l'erreur et retourner false
-	        System.err.println("Erreur lors de la vérification du format: " + e.getMessage());
-	        return false;
-	    }
-	}
-
-
+	
 
 	@Override
 	public Etudiant chercherEtudiantById(Long id) {
@@ -216,10 +131,10 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	}
 
 	@Override
-	public boolean inscription(File fichier,List<String> liste) {
+	public boolean inscription(File fichier,List<String> liste,int nbrColonnes) {
 		try {
 	        // Vérifier le format du fichier
-	        if (!checkFormat(fichier, liste)) {
+	        if (!ifichierexcelservice.checkFormat(fichier, liste,nbrColonnes)) {
 	            System.err.println("Le format du fichier n'est pas valide.");
 	            return false;
 	        }
@@ -234,10 +149,10 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	                if (row == null) continue; // Ignorer les lignes vides
 
 	                // Lire les données de la ligne
-	                List<String> ligneData = lireLigne(row);
+	                List<String> ligneData = ifichierexcelservice.lireLigne(row,nbrColonnes);
 
 	                // Créer et sauvegarder l'étudiant
-	                if (!creerEtSauvegarderEtudiant(ligneData)) {
+	                if (!creerEtSauvegarderEtudiantFromExcel(ligneData)) {
 	                    System.err.println("Erreur lors de la création de l'étudiant à la ligne : " + (ligneIndex + 1));
 	                }
 	            }
@@ -250,9 +165,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    return true;
 	}
-
-
-	@Override
+	
+	@Override @Transactional
 	public Etudiant modifierEtudiant(Long id,String cne, String nom, String prenom, Long niveau) {
 		Optional<Etudiant> e=ietudiant.findById(id);
 		if(!(e.isEmpty())){

@@ -1,0 +1,96 @@
+package com.example.demo;
+
+import com.example.demo.entities.Niveau;
+import com.example.demo.repositories.INiveau;
+import com.example.demo.services.Etudiant.IEtudiantService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+@SpringBootApplication
+public class Application1Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application1Application.class, args);
+    }
+    @Bean
+    CommandLineRunner basededonnes(INiveau iNiveau) {
+        return args -> {
+            if (iNiveau.count() == 0) {
+                System.out.println("Initialisation de la table Niveau...");
+
+                // Lire le fichier niveaux.csv
+                Map<Long, Niveau> niveauxMap = lireNiveauxDepuisFichier();
+
+                // Sauvegarder les niveaux dans la base de données
+                iNiveau.saveAll(niveauxMap.values());
+                System.out.println("Table Niveau initialisée avec " + niveauxMap.size() + " enregistrements.");
+            } else {
+                System.out.println("La table Niveau est déjà initialisée.");
+            }
+        };
+    }
+
+    private Map<Long, Niveau> lireNiveauxDepuisFichier() {
+        Map<Long, Niveau> niveauxMap = new HashMap<>();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("niveaux.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            String ligne;
+            boolean premiereLigne = true;
+            while ((ligne = reader.readLine()) != null) {
+                if (premiereLigne) {
+                    // Ignorer l'en-tête du fichier CSV
+                    premiereLigne = false;
+                    continue;
+                }
+
+                // Diviser la ligne en colonnes
+                String[] colonnes = ligne.split(",");
+                if (colonnes.length < 4) {
+                    System.err.println("Ligne mal formatée : " + ligne);
+                    continue;
+                }
+
+                // Extraire les données de la ligne
+                Long id = Long.parseLong(colonnes[0]);
+                String alias = colonnes[1];
+                String nom = colonnes[2];
+                Long niveauSuivantId = colonnes[3].isEmpty() ? null : Long.parseLong(colonnes[3]);
+
+                // Créer un objet Niveau
+                Niveau niveau = new Niveau();
+                niveau.setId(id);
+                niveau.setAlias(alias);
+                niveau.setNom(nom);
+
+                // Ajouter à la map pour gérer les relations plus tard
+                niveauxMap.put(id, niveau);
+
+                // Si le niveau a un niveau suivant, définir la relation
+                if (niveauSuivantId != null) {
+                    Niveau niveauSuivant = niveauxMap.get(niveauSuivantId);
+                    if (niveauSuivant != null) {
+                        niveau.setNiveauSuivant(niveauSuivant);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la lecture du fichier niveaux.csv : " + e.getMessage());
+        }
+        return niveauxMap;
+    }
+	/*
+	 * @Bean CommandLineRunner demo(IEtudiantService etudiantService) { return args
+	 * -> { File file = new File("C:\\Users\\MONCEF\\Desktop\\projet.xlsx");
+	 * etudiantService.inscrire(file); }; }
+	 */
+}

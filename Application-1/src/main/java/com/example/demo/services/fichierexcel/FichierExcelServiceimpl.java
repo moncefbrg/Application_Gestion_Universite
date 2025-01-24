@@ -6,12 +6,62 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FichierExcelServiceimpl implements IFichierExcelService {
+	
+	@Override
+	public boolean checkFormat(File fichier, List<String> liste,int nbrColonne) {
+	    try (FileInputStream fis = new FileInputStream(fichier);
+	         Workbook workbook = new XSSFWorkbook(fis)) {
+
+	        // Vérifier le format des colonnes
+	        if (!checkNbrColonnes(fichier, nbrColonne)) {
+	            // Si les colonnes ne respectent pas le format, retourner false
+	            return false;
+	        }
+
+	        Sheet sheet = workbook.getSheetAt(0);  // On travaille avec la première feuille
+
+	        // Parcours des lignes à partir de la ligne 2 (index 1 dans Excel)
+	        for (int ligneIndex = 1; ligneIndex <= sheet.getLastRowNum(); ligneIndex++) {
+	            Row row = sheet.getRow(ligneIndex);
+
+	            if (row == null) continue;  // Si la ligne est vide, on passe à la suivante
+
+	            // Parcours des colonnes de chaque ligne
+	            for (int colIndex = 0; colIndex < liste.size(); colIndex++) {
+	                // Récupérer le type attendu depuis la liste
+	                String typeAttendu = liste.get(colIndex);
+
+	                // Récupérer le type réel de la cellule
+	                String typeCellule = formatTypeDonnee(fichier, colIndex, ligneIndex);
+
+	                // Comparer le type attendu avec le type réel
+	                if (!typeAttendu.equals(typeCellule)) {
+	                    // Si les types ne correspondent, retourner false
+	                    System.err.println("Erreur à la ligne " + (ligneIndex + 1) + ", colonne " + (colIndex + 1) +
+	                            ": Attendu '" + typeAttendu + "', trouvé '" + typeCellule + "'.");
+	                    return false;
+	                }
+	            }
+	        }
+
+	        // Si tout est correct, retourner true
+	        return true;
+
+	    } catch (Exception e) {
+	        // Si une exception est lancée, log l'erreur et retourner false
+	        System.err.println("Erreur lors de la vérification du format: " + e.getMessage());
+	        return false;
+	    }
+	}
+
 
     @Override
-    public boolean formatColonnes(File fichier, int nbr) throws Exception {
+    public boolean checkNbrColonnes(File fichier, int nbr) throws Exception {
         try (FileInputStream fis = new FileInputStream(fichier);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
@@ -57,9 +107,9 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
             throw new Exception("Erreur lors de la lecture du fichier : " + e.getMessage(), e);
         }
     }
-
+    @Override
     // Méthode pour déterminer le type de la cellule sous forme de chaîne de caractères
-    private String getCellTypeAsString(Cell cell) {
+    public String getCellTypeAsString(Cell cell) {
         switch (cell.getCellType()) {
             case STRING:
                 return "STRING";
@@ -79,6 +129,33 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
                 return "UNKNOWN";
         }
     }
-
+    @Override
+    public List<String> lireLigne(Row row,int nbrColonnes) {
+	    List<String> ligneData = new ArrayList<>();
+	    for (int colonneIndex = 0; colonneIndex < nbrColonnes; colonneIndex++) { 
+	        Cell cell = row.getCell(colonneIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	        ligneData.add(lireValeurCellule(cell));
+	    }
+	    return ligneData;
+	}
+    @Override
+    public String lireValeurCellule(Cell cell) {
+	    switch (cell.getCellType()) {
+	        case STRING:
+	            return cell.getStringCellValue();
+	        case NUMERIC:
+	            if (DateUtil.isCellDateFormatted(cell)) {
+	                return cell.getDateCellValue().toString();
+	            } else {
+	                return String.valueOf((int) cell.getNumericCellValue());
+	            }
+	        case BOOLEAN:
+	            return String.valueOf(cell.getBooleanCellValue());
+	        case BLANK:
+	            return ""; // Cellule vide
+	        default:
+	            throw new IllegalStateException("Type de cellule non géré : " + cell.getCellType());
+	    }
+	}
     
 }
