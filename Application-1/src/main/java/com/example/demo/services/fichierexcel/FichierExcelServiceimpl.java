@@ -2,10 +2,15 @@ package com.example.demo.services.fichierexcel;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+
+
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -225,4 +230,170 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
 
         return true; // Si toutes les notes sont valides
     }
+    
+    @Override
+    public File createExcelFile(String path, String anneeUniversitaire, String dateDeliberation, String classe,
+            List<String> modules, List<String> enseignants, List<String> etudiants) throws IOException {
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("Délibération");
+
+    // Créer une police en gras pour les en-têtes
+    Font headerFont = workbook.createFont();
+    headerFont.setBold(true);
+    headerFont.setFontHeightInPoints((short) 12);
+    CellStyle headerStyle = workbook.createCellStyle();
+    headerStyle.setFont(headerFont);
+    headerStyle.setBorderBottom(BorderStyle.THIN);
+    headerStyle.setBorderTop(BorderStyle.THIN);
+    headerStyle.setBorderLeft(BorderStyle.THIN);
+    headerStyle.setBorderRight(BorderStyle.THIN);
+    headerStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    headerStyle.setAlignment(HorizontalAlignment.CENTER);  // Alignement horizontal au centre
+    headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);  // Alignement vertical au centre
+  
+    
+ // Créer style deds cellules vides
+    CellStyle celluleVideStyle = workbook.createCellStyle();
+    celluleVideStyle.setBorderBottom(BorderStyle.THIN);
+    celluleVideStyle.setBorderTop(BorderStyle.THIN);
+    celluleVideStyle.setBorderLeft(BorderStyle.THIN);
+    celluleVideStyle.setBorderRight(BorderStyle.THIN);
+    celluleVideStyle.setAlignment(HorizontalAlignment.CENTER);
+
+    // Créer une police normale pour les données
+    Font dataFont = workbook.createFont();
+    dataFont.setFontHeightInPoints((short) 11);
+    CellStyle dataStyle = workbook.createCellStyle();
+    dataStyle.setFont(dataFont);
+    dataStyle.setBorderBottom(BorderStyle.THIN);
+    dataStyle.setBorderTop(BorderStyle.THIN);
+    dataStyle.setBorderLeft(BorderStyle.THIN);
+    dataStyle.setBorderRight(BorderStyle.THIN);
+    dataStyle.setAlignment(HorizontalAlignment.CENTER);
+
+    // Créer la ligne d'en-tête
+    Row headerRow = sheet.createRow(0);
+    createCell(headerRow, 0, "Annee universitaire", headerStyle);
+    createCell(headerRow, 1, anneeUniversitaire, celluleVideStyle);
+    createCell(headerRow, 2, "Date deliberation", headerStyle);
+    createCell(headerRow, 3, dateDeliberation, celluleVideStyle);
+    
+ // Créer la deuxieme ligne
+    Row ligneVide = sheet.createRow(1);
+    createCell(ligneVide, 0, null, celluleVideStyle);
+    createCell(ligneVide, 1, null, celluleVideStyle);
+    createCell(ligneVide, 2, null, celluleVideStyle);
+    createCell(ligneVide, 3, null, celluleVideStyle);
+    
+
+    Row classRow = sheet.createRow(2);
+    createCell(classRow, 0, "Classe", headerStyle);
+    createCell(classRow, 1, classe, celluleVideStyle);
+    createCell(classRow, 2, null, headerStyle);
+    createCell(classRow, 3, null, headerStyle);
+
+    // Créer les en-têtes des modules
+    Row moduleHeaderRow = sheet.createRow(4);
+    createCell(moduleHeaderRow, 0, "ID ETUDIANT", headerStyle);
+    createCell(moduleHeaderRow, 1, "CNE", headerStyle);
+    createCell(moduleHeaderRow, 2, "NOM", headerStyle);
+    createCell(moduleHeaderRow, 3, "PRENOM", headerStyle);
+    
+ // Créer les en-têtes vide dessous du 6ieme ligne
+    Row enteteVide = sheet.createRow(5);
+    createCell(enteteVide, 0, null, headerStyle);
+    createCell(enteteVide, 1, null, headerStyle);
+    createCell(enteteVide, 2, null, headerStyle);
+    createCell(enteteVide, 3, null, headerStyle);
+
+    int cellIndex = 4;
+    for (int i = 0; i < modules.size(); i++) {
+        createCell(moduleHeaderRow, cellIndex, modules.get(i) + " (" + enseignants.get(i) + ")", headerStyle);
+        sheet.addMergedRegion(new CellRangeAddress(4, 4, cellIndex, cellIndex + 1)); // Fusionner avec la cellule à droite
+        cellIndex += 2;
+        createCell(moduleHeaderRow, cellIndex++, "moyenne", headerStyle);
+        createCell(moduleHeaderRow, cellIndex++, "validation", headerStyle);
+    }
+    createCell(moduleHeaderRow, cellIndex, "Moyenne generale", headerStyle);
+    createCell(moduleHeaderRow, cellIndex + 1, "Rang", headerStyle);
+
+    // Ajouter les noms des éléments sous les modules
+    Row elementHeaderRow = sheet.createRow(5);
+    cellIndex = 4;
+    for (int i = 0; i < modules.size(); i++) {
+        createCell(elementHeaderRow, cellIndex++, "nom element 1", headerStyle);
+        createCell(elementHeaderRow, cellIndex++, "nom element 2", headerStyle);
+        createCell(elementHeaderRow, cellIndex++, "", headerStyle);
+        createCell(elementHeaderRow, cellIndex++, "", headerStyle);
+    }
+
+    // Fusionner les cellules "ID ETUDIANT", "CNE", "NOM", "PRENOM", "Moyenne generale", "Rang", "moyenne", "validation"
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, 0, 0)); // ID ETUDIANT
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, 1, 1)); // CNE
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, 2, 2)); // NOM
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, 3, 3)); // PRENOM
+    
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, cellIndex, cellIndex)); // Moyenne generale
+    sheet.addMergedRegion(new CellRangeAddress(4, 5, cellIndex + 1, cellIndex + 1)); // Rang
+
+    // Ajouter les données des étudiants
+    int rowIndex = 6;
+    for (String etudiant : etudiants) {
+        Row row = sheet.createRow(rowIndex++);
+        createCell(row, 0, "ID1", dataStyle);
+        createCell(row, 1, "CNE", dataStyle);
+        createCell(row, 2, "NOM", dataStyle);
+        createCell(row, 3, etudiant, dataStyle);
+
+        cellIndex = 4;
+        for (int i = 0; i < modules.size(); i++) {
+            createCell(row, cellIndex++, "12", dataStyle);
+            createCell(row, cellIndex++, "12", dataStyle);
+            createCell(row, cellIndex++, "12", dataStyle);
+            createCell(row, cellIndex++, "V", dataStyle);
+        }
+        createCell(row, cellIndex, "18", dataStyle);
+        createCell(row, cellIndex + 1, "20", dataStyle);
+    }
+
+    // Ajuster la largeur des colonnes
+    for (int i = 0; i < cellIndex + 2; i++) {
+        sheet.autoSizeColumn(i);
+    }
+
+    // Créer le dossier s'il n'existe pas
+    File resourcesDir = new File(path);
+    if (!resourcesDir.exists()) {
+        resourcesDir.mkdirs();
+    }
+
+    // Générer un nom de fichier unique
+    String baseFileName = "Fichier_Deliberation";
+    String fileExtension = ".xlsx";
+    File file = new File(path + File.separator + baseFileName + fileExtension);
+
+    int counter = 1;
+    while (file.exists()) {
+        file = new File(path + File.separator + baseFileName + "_" + counter + fileExtension);
+        counter++;
+    }
+
+    // Écrire le fichier Excel
+    try (FileOutputStream fileOut = new FileOutputStream(file)) {
+        workbook.write(fileOut);
+    } finally {
+        workbook.close();
+    }
+
+    return file;
+}
+    @Override
+    public Cell createCell(Row row, int column, String value, CellStyle style) {
+        Cell cell = row.createCell(column);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        return cell;
+    }
+
 }
