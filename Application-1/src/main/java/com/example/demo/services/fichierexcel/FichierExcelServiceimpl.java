@@ -1,5 +1,6 @@
 package com.example.demo.services.fichierexcel;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -158,4 +159,70 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
 	    }
 	}
     
+    @Override
+    public String verifierFormatFichierExcel(File file) throws IOException {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("Le fichier n'existe pas ou est null.");
+        }
+
+        // Utilisation du try-with-resources pour garantir la fermeture automatique du flux
+        try (FileInputStream fis = new FileInputStream(file)) {
+            try(Workbook workbook = new XSSFWorkbook(fis);){
+                // Essayer de lire le fichier comme un fichier .xlsx
+                return "XLSX";
+            } catch (IOException e) {
+                // Si ce n'est pas un fichier .xlsx, essayer de lire comme un fichier .xls
+                try(Workbook workbook = new HSSFWorkbook(fis);){
+                    return "XLS";
+                } catch (IOException ex) {
+                    // Si ni .xlsx ni .xls, retourner "INCONNU"
+                    return "INCONNU";
+                }
+            }
+        }
+    }
+    
+    @Override
+    public boolean verifierNotesFichierExcel(File file) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file);
+             Workbook workbook = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Commencer à la ligne 5 
+            for (int i = 4; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue; // Ignorer les lignes vides
+                }
+
+                // Colonnes ELEMENT 1 (index 4) et ELEMENT 2 (index 5)
+                Cell cell4 = row.getCell(4); // ELEMENT 1
+                Cell cell5 = row.getCell(5); // ELEMENT 2
+
+                // Vérifier si les cellules sont null ou non numériques
+                if (cell4 == null || cell5 == null) {
+                    throw new IllegalArgumentException("Erreur à la ligne " + (i + 1) + ": Les cellules des notes sont manquantes.");
+                }
+                if (cell4.getCellType() != CellType.NUMERIC || cell5.getCellType() != CellType.NUMERIC) {
+                    throw new IllegalArgumentException("Erreur à la ligne " + (i + 1) + ": Les notes doivent être des valeurs numériques.");
+                }
+
+                double note4 = cell4.getNumericCellValue();
+                double note5 = cell5.getNumericCellValue();
+
+                // Vérifier les conditions sur les notes
+                if (note4 <= 0 || note5 <= 0) {
+                    throw new IllegalArgumentException("Erreur à la ligne " + (i + 1) + ": Les notes doivent être supérieures à 0.");
+                }
+                if (note4 > 20 || note5 > 20) {
+                    throw new IllegalArgumentException("Erreur à la ligne " + (i + 1) + ": Les notes ne doivent pas dépasser 20.");
+                }
+            }
+        } catch (IOException e) {
+            throw new IOException("Erreur lors de la lecture du fichier Excel.", e);
+        }
+
+        return true; // Si toutes les notes sont valides
+    }
 }
