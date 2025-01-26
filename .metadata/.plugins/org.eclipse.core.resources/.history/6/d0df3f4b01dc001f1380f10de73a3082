@@ -1,0 +1,88 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.IModule;
+import com.example.demo.repositories.INiveau;
+
+import jakarta.transaction.Transactional;
+@Service
+public class NiveauServiceImpl implements INiveauService{
+	@Autowired
+	private INiveau iNiveau;
+	@Autowired
+	private IModule iModule;
+	@Transactional
+	@Override
+	public boolean creerNiveau(Long id, String nom, String alias, Niveau niveauSuivant, List<Module> modules, Seuil seuil, List<Formule> formules) throws Exception {
+	    // Vérifier si un niveau avec le même ID existe déjà
+	    if (iNiveau.findById(id).isPresent()) {
+	        throw new RuntimeException("Un niveau avec l'ID " + id + " existe déjà.");
+	    }
+
+	    // Vérifier si un niveau avec le même nom existe déjà
+	    if (iNiveau.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Un niveau avec le nom " + nom + " existe déjà.");
+	    }
+
+	    // Vérifier si un niveau avec le même alias existe déjà
+	    if (iNiveau.findByAlias(alias).isPresent()) {
+	        throw new RuntimeException("Un niveau avec l'alias " + alias + " existe déjà.");
+	    }
+
+	    // Vérifier si tous les modules existent
+	    List<String> modulesManquants = modules.stream()
+	            .map(Module::getNom)
+	            .filter(moduleNom -> iModule.findByNom(moduleNom).isEmpty())
+	            .collect(Collectors.toList());
+
+	    if (!modulesManquants.isEmpty()) {
+	        throw new RuntimeException("Les modules suivants n'existent pas : " + modulesManquants);
+	    }
+
+	    // Vérifier si le niveau suivant existe
+	    if (niveauSuivant != null && iNiveau.findById(niveauSuivant.getId()).isEmpty()) {
+	        throw new RuntimeException("Le niveau suivant avec l'ID " + niveauSuivant.getId() + " n'existe pas.");
+	    }
+
+	    // Vérifier si le seuil existe (si nécessaire)
+	    if (seuil != null && iSeuil.findById(seuil.getId()).isEmpty()) {
+	        throw new RuntimeException("Le seuil avec l'ID " + seuil.getId() + " n'existe pas.");
+	    }
+
+	    // Vérifier si toutes les formules existent (si nécessaire)
+	    if (formules != null) {
+	        List<String> formulesManquantes = formules.stream()
+	                .map(Formule::getNom)
+	                .filter(formuleNom -> iFormule.findByNom(formuleNom).isEmpty())
+	                .collect(Collectors.toList());
+
+	        if (!formulesManquantes.isEmpty()) {
+	            throw new RuntimeException("Les formules suivantes n'existent pas : " + formulesManquantes);
+	        }
+	    }
+
+	    // Créer le niveau
+	    Niveau niveau = new Niveau();
+	    niveau.setId(id);
+	    niveau.setNom(nom);
+	    niveau.setAlias(alias);
+	    niveau.setNiveauSuivant(niveauSuivant);
+	    niveau.setModules(modules);
+	    niveau.setSeuil(seuil);
+	    niveau.setFormules(formules);
+
+	    // Sauvegarder le niveau
+	    iNiveau.save(niveau);
+
+	    return true;
+	}
+
+}

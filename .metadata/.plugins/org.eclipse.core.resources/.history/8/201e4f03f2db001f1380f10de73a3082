@@ -1,0 +1,52 @@
+package com.example.demo.services.classe;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.repositories.IClasse;
+
+public class ClasseServiceImpl implements IClasseService{
+	@Autowired
+	private IClasse iClasse;
+
+	@Override
+	public Classe creerClasse(List<Etudiant> liste,String nom) {
+		Classe classe=new Classe();
+		classe.setNom(nom);
+		classe.setEtudiants(liste);
+		return classe;
+	}
+
+	@Override
+	public Classe chercherClasse(Long id) {
+		Optional<Classe> classe=iClasse.findById(id);
+		return classe.get();
+	}
+
+	@Override
+	public List<Etudiant> consulterClasse(Long id) {
+		Classe classe=chercherClasse(id);
+		List<Etudiant> etudiants=classe.getEtudiants().stream()
+				.collect(Collectors.toList());
+		return etudiants;
+	}
+	@Override
+	public Long chercherClasseByNom(String nom) throws Exception {
+	    Optional<Classe> classe = iClasse.findByNom(nom);
+	    
+	    if (classe.isPresent()) {
+	        // Retourne l'ID de la classe trouvée
+	        return classe.get().getId();
+	    } else {
+	        // Gérer le cas où la classe n'est pas trouvée
+	        throw new Exception("Classe avec le nom '" + nom + "' non trouvée.");
+	    }
+	}
+
+
+}

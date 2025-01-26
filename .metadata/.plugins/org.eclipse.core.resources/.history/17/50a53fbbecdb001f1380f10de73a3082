@@ -1,0 +1,11 @@
+package com.example.demo.services.classe;
+
+import java.util.List;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.entities.Etudiant;
+
+public interface IClasseService {
+	public Classe creerClasse(List<Etudiant> liste);
+	public Classe chercherClasse(Long id);
+}

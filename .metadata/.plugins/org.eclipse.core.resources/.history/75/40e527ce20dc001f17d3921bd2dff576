@@ -1,0 +1,127 @@
+package com.example.demo.services.module;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Module;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IModule;
+
+@Service
+public class ModuleServiceImpl implements IModuleService{
+	@Autowired
+	IModule iModule;
+	@Autowired
+	IElement iElement;
+	@Override
+	@Transactional
+	public boolean creerModule(Long id, String nom, String semestre, List<Element> elements) {
+	    // Vérifier que les entrées ne sont pas null ou invalides
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID du module ne peut pas être null.");
+	    }
+	    if (nom == null || nom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nom du module ne peut pas être null ou vide.");
+	    }
+	    if (semestre == null || semestre.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le semestre ne peut pas être null ou vide.");
+	    }
+	    if (elements == null || elements.isEmpty()) {
+	        throw new IllegalArgumentException("La liste des éléments ne peut pas être null ou vide.");
+	    }
+
+	    // Vérifier si un module avec le même ID existe déjà
+	    if (iModule.findById(id).isPresent()) {
+	        throw new RuntimeException("Un module avec l'ID " + id + " existe déjà.");
+	    }
+
+	    // Vérifier si un module avec le même nom existe déjà
+	    if (iModule.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Un module avec le nom " + nom + " existe déjà.");
+	    }
+
+	    // Vérifier si tous les éléments existent
+	    List<String> elementsManquants = elements.stream()
+	            .map(Element::getNom)
+	            .filter(elementNom -> iElement.findByNom(elementNom).isEmpty())
+	            .collect(Collectors.toList());
+
+	    if (!elementsManquants.isEmpty()) {
+	        throw new RuntimeException("Les éléments suivants n'existent pas : " + elementsManquants);
+	    }
+
+	    // Créer le module
+	    Module module = Module.builder()
+	            .id(id)
+	            .nom(nom)
+	            .semestre(semestre)
+	            .elements(elements)
+	            .build();
+
+	    // Sauvegarder le module
+	    iModule.save(module);
+
+	    return true; // Retourne true si la création est réussie
+	}
+
+	@Override
+	@Transactional
+	public boolean modifierModule(Long id, String nom, String semestre, List<Element> elements) {
+	    // Vérifier que l'ID n'est pas null
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID du module ne peut pas être null.");
+	    }
+
+	    // Rechercher le module par son ID
+	    Optional<Module> moduleOptional = iModule.findById(id);
+	    if (moduleOptional.isEmpty()) {
+	        throw new RuntimeException("Le module avec l'ID " + id + " n'existe pas.");
+	    }
+
+	    // Récupérer le module à modifier
+	    Module module = moduleOptional.get();
+
+	    // Mettre à jour les attributs du module (uniquement si les valeurs ne sont pas null)
+	    if (nom != null && !nom.trim().isEmpty()) {
+	        // Vérifier si un module avec le même nom existe déjà (autre que celui en cours de modification)
+	        Optional<Module> moduleAvecMemeNom = iModule.findByNom(nom);
+	        if (moduleAvecMemeNom.isPresent() && !moduleAvecMemeNom.get().getId().equals(id)) {
+	            throw new RuntimeException("Un module avec le nom " + nom + " existe déjà.");
+	        }
+	        module.setNom(nom);
+	    }
+
+	    if (semestre != null && !semestre.trim().isEmpty()) {
+	        module.setSemestre(semestre);
+	    }
+
+	    if (elements != null && !elements.isEmpty()) {
+	        // Vérifier si tous les éléments existent
+	        List<String> elementsManquants = elements.stream()
+	                .map(Element::getNom)
+	                .filter(elementNom -> iElement.findByNom(elementNom).isEmpty())
+	                .collect(Collectors.toList());
+
+	        if (!elementsManquants.isEmpty()) {
+	            throw new RuntimeException("Les éléments suivants n'existent pas : " + elementsManquants);
+	        }
+	        module.setElements(elements);
+	    }
+
+	    // Sauvegarder le module (automatiquement géré par @Transactional)
+	    iModule.save(module);
+
+	    return true; // Retourne true si la modification est réussie
+	}
+	@Override
+	public boolean supprimerModule(Long id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

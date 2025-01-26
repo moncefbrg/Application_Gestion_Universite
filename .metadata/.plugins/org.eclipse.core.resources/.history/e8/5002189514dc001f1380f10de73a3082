@@ -1,0 +1,154 @@
+package com.example.demo.services.classe;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.repositories.IClasse;
+import com.example.demo.repositories.IEtudiant;
+
+public class ClasseServiceImpl implements IClasseService{
+	@Autowired
+	private IClasse iClasse;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Override
+	public boolean creerClasse(String nom) {
+	    // Vérifier si une classe avec ce nom existe déjà
+	    if (iClasse.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Une classe avec le nom '" + nom + "' existe déjà.");
+	    }
+
+	    // Créer une nouvelle classe
+	    Classe classe = new Classe();
+	    classe.setNom(nom);
+
+	    // Sauvegarder la classe
+	    Classe savedClasse = iClasse.save(classe);
+
+	    // Vérifier si la classe a été correctement sauvegardée
+	    return savedClasse != null && savedClasse.getId() != null;
+	}
+	
+	@Override @Transactional
+	public boolean supprimerClasse(String nom) {
+		iClasse.delete(iClasse.findByNom(nom).get());
+		return true;
+	};
+	@Override
+	@Transactional
+	public boolean modifierClasse(String nom, String nouveauNom) {
+	    // Vérifier que les noms ne sont pas null ou vides
+	    if (nom == null || nom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nom de la classe ne peut pas être null ou vide.");
+	    }
+	    if (nouveauNom == null || nouveauNom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nouveau nom de la classe ne peut pas être null ou vide.");
+	    }
+
+	    // Rechercher la classe par son nom
+	    Optional<Classe> classeOptional = iClasse.findByNom(nom);
+	    if (classeOptional.isEmpty()) {
+	        throw new RuntimeException("La classe avec le nom " + nom + " n'existe pas.");
+	    }
+
+	    // Vérifier si une classe avec le nouveau nom existe déjà
+	    if (iClasse.findByNom(nouveauNom).isPresent()) {
+	        throw new RuntimeException("Une classe avec le nom " + nouveauNom + " existe déjà.");
+	    }
+
+	    // Modifier le nom de la classe
+	    Classe classe = classeOptional.get();
+	    classe.setNom(nouveauNom);
+
+	    // Pas besoin d'appeler iClasse.save(classe) car @Transactional le gère automatiquement
+
+	    return true; // Retourne true si la modification est réussie
+	}
+
+	@Override
+	@Transactional
+	public boolean ajouterEtudiantClasse(String nom, Long id) {
+	    // Vérifier que les entrées ne sont pas null ou invalides
+	    if (nom == null || nom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nom de la classe ne peut pas être null ou vide.");
+	    }
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID de l'étudiant ne peut pas être null.");
+	    }
+
+	    // Rechercher la classe par son nom
+	    Optional<Classe> classeOptional = iClasse.findByNom(nom);
+	    if (classeOptional.isEmpty()) {
+	        throw new RuntimeException("La classe avec le nom " + nom + " n'existe pas.");
+	    }
+
+	    // Rechercher l'étudiant par son ID
+	    Optional<Etudiant> etudiantOptional = iEtudiant.findById(id);
+	    if (etudiantOptional.isEmpty()) {
+	        throw new RuntimeException("L'étudiant avec l'ID " + id + " n'existe pas.");
+	    }
+
+	    // Récupérer les objets
+	    Classe classe = classeOptional.get();
+	    Etudiant etudiant = etudiantOptional.get();
+
+	    // Vérifier si l'étudiant est déjà dans la classe
+	    if (classe.getEtudiants().contains(etudiant)) {
+	        throw new RuntimeException("L'étudiant avec l'ID " + id + " est déjà dans la classe " + nom + ".");
+	    }
+
+	    // Ajouter l'étudiant à la classe
+	    classe.getEtudiants().add(etudiant);
+
+	    // Sauvegarder la classe (automatiquement géré par @Transactional)
+	    iClasse.save(classe);
+
+	    return true; // Retourne true si l'ajout est réussi
+	}
+
+	@Override
+	@Transactional
+	public boolean supprimerEtudiantClasse(String nom, Long id) {
+	    // Vérifier que les entrées ne sont pas null ou invalides
+	    if (nom == null || nom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nom de la classe ne peut pas être null ou vide.");
+	    }
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID de l'étudiant ne peut pas être null.");
+	    }
+
+	    // Rechercher la classe par son nom
+	    Optional<Classe> classeOptional = iClasse.findByNom(nom);
+	    if (classeOptional.isEmpty()) {
+	        throw new RuntimeException("La classe avec le nom " + nom + " n'existe pas.");
+	    }
+
+	    // Rechercher l'étudiant par son ID
+	    Optional<Etudiant> etudiantOptional = iEtudiant.findById(id);
+	    if (etudiantOptional.isEmpty()) {
+	        throw new RuntimeException("L'étudiant avec l'ID " + id + " n'existe pas.");
+	    }
+
+	    // Récupérer les objets
+	    Classe classe = classeOptional.get();
+	    Etudiant etudiant = etudiantOptional.get();
+
+	    // Vérifier si l'étudiant est dans la classe
+	    if (!classe.getEtudiants().contains(etudiant)) {
+	        throw new RuntimeException("L'étudiant avec l'ID " + id + " n'est pas dans la classe " + nom + ".");
+	    }
+
+	    // Supprimer l'étudiant de la classe
+	    classe.getEtudiants().remove(etudiant);
+
+	    // Sauvegarder la classe (automatiquement géré par @Transactional)
+	    iClasse.save(classe);
+
+	    return true; // Retourne true si la suppression est réussie
+	}
+
+}

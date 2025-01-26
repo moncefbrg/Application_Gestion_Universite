@@ -1,0 +1,20 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+
+public class NiveauServiceImpl implements INiveauService{
+	public boolean creerNiveau(Long id,String nom,String alias,Niveau niveauSuivant,List<Module> modules,Seuil seuil,Formule formules)throws Exception {
+		Niveau n=new Niveau();
+		n.setId(id);if()
+		n.setNom(nom);
+		n.setAlias(alias);
+		
+		
+		return false;
+	};
+
+}

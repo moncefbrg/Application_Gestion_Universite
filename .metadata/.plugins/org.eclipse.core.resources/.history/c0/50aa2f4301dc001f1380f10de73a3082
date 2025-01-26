@@ -1,0 +1,38 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.IModule;
+import com.example.demo.repositories.INiveau;
+
+import jakarta.transaction.Transactional;
+@Service
+public class NiveauServiceImpl implements INiveauService{
+	@Autowired
+	private INiveau iNiveau;
+	@Autowired
+	private IModule iModule;
+	@Transactional
+	@Override
+	public boolean creerNiveau(Long id,String nom,String alias,Niveau niveauSuivant,List<Module> modules,Seuil seuil,List<Formule> formules)throws Exception {
+		Niveau n=new Niveau();
+		if(iNiveau.findById(id).isPresent()) { throw new RuntimeException("l'id de  la classe avec "+id+"exsite deja");}else {n.setId(id);}
+		if(iNiveau.findByNom(nom).isPresent()) { throw new RuntimeException("le nom de la classe"+nom+"exsite deja");}else {n.setNom(nom);}
+		if(iNiveau.findByAlias(alias).isPresent()) { throw new RuntimeException("l'alias de la classe"+alias+"exsite deja");}else {n.setAlias(alias);}
+		List<String> modl=modules.stream().map(module->module.getNom()).filter(module->iModule.findByNom(module).isEmpty()).collect(Collectors.toList());
+		if(!(modules.size()==modl.size())) { throw new RuntimeException("un ou plus des modules n'exsitent pas");}else {n.setModules(modules);}
+		if(iNiveau.findById(niveauSuivant.getId()).isEmpty()) { throw new RuntimeException("le niveau suivant "+id+"n'existe pas");}else {n.setNiveauSuivant(niveauSuivant);}
+		n.setSeuil(seuil);
+		n.setFormules(formules);
+		iNiveau.save(n);
+		return true;
+	};
+
+}

@@ -1,0 +1,81 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.IModule;
+import com.example.demo.repositories.INiveau;
+@Service
+public class NiveauServiceImpl implements INiveauService{
+	@Autowired
+	private INiveau iNiveau;
+	@Autowired
+	private IModule iModule;
+	@Transactional
+	@Override
+	public boolean creerNiveau(Long id, String nom, String alias, Niveau niveauSuivant, List<Module> modules, Seuil seuil, List<Formule> formules) throws Exception {
+	    // Vérifier si un niveau avec le même ID existe déjà
+	    if (iNiveau.findById(id).isPresent()) {
+	        throw new RuntimeException("Un niveau avec l'ID " + id + " existe déjà.");
+	    }
+
+	    // Vérifier si un niveau avec le même nom existe déjà
+	    if (iNiveau.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Un niveau avec le nom " + nom + " existe déjà.");
+	    }
+
+	    // Vérifier si un niveau avec le même alias existe déjà
+	    if (iNiveau.findByAlias(alias).isPresent()) {
+	        throw new RuntimeException("Un niveau avec l'alias " + alias + " existe déjà.");
+	    }
+
+	    // Vérifier si tous les modules existent
+	    List<String> modulesManquants = modules.stream()
+	            .map(Module::getNom)
+	            .filter(moduleNom -> iModule.findByNom(moduleNom).isEmpty())
+	            .collect(Collectors.toList());
+
+	    if (!modulesManquants.isEmpty()) {
+	        throw new RuntimeException("Les modules suivants n'existent pas : " + modulesManquants);
+	    }
+
+	    // Vérifier si le niveau suivant existe
+	    if (niveauSuivant != null && iNiveau.findById(niveauSuivant.getId()).isEmpty()) {
+	        throw new RuntimeException("Le niveau suivant avec l'ID " + niveauSuivant.getId() + " n'existe pas.");
+	    }
+
+	    // Créer le niveau avec le Builder
+	    Niveau niveau = Niveau.builder()
+	            .id(id)
+	            .nom(nom)
+	            .alias(alias)
+	            .niveauSuivant(niveauSuivant)
+	            .modules(modules)
+	            .seuil(seuil)
+	            .formules(formules)
+	            .build();
+
+	    // Sauvegarder le niveau
+	    iNiveau.save(niveau);
+
+	    return true;
+	}
+	@Override @Transactional
+	public boolean modifierNiveau(Long id,String nom,String alias,Niveau niveauSuivant,List<Module> modules,Seuil seuil,List<Formule> formules)throws Exception{
+		
+		return true;
+	};
+	@Override @Transactional
+	public boolean supprimerNiveau(String nom) {
+		
+		return true;
+	};
+}

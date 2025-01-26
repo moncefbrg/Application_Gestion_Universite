@@ -1,0 +1,27 @@
+package com.example.demo.services.classe;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.repositories.IClasse;
+
+public class ClasseServiceImpl implements IClasseService{
+	@Autowired
+	private IClasse iClasse;
+
+	@Override
+	public Classe creerClasse(List<Etudiant> liste) {
+		
+		return null;
+	}
+
+	@Override
+	public Classe consulterClasse(Long id) {
+		
+		return null;
+	}
+
+}

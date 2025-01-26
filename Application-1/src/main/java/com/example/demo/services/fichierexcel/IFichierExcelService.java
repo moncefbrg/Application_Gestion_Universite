@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
 
 
@@ -22,5 +23,11 @@ public interface IFichierExcelService {
 	public File createExcelFile(String path, String anneeUniversitaire, String dateDeliberation, String classe,
             List<String> modules, List<String> enseignants, List<String> etudiants) throws IOException;
     public Cell createCell(Row row, int column, String value, CellStyle style);
+    public  boolean validateExcelStructure(String filePath);//verfife la structure du fichier de deliberation
+    public String getCellValue(Row row, int cellIndex);
+    public boolean validateMergedCells(Sheet sheet);
+    public boolean validateModuleStructure(Sheet sheet);
+    public boolean validateDataContent(Sheet sheet);
+    public boolean validateHeaders(Sheet sheet);
 	
 }

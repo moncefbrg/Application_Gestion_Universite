@@ -1,0 +1,5 @@
+package com.example.demo.services.module;
+
+public class ModuleServiceImpl {
+
+}

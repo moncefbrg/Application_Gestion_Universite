@@ -1,0 +1,9 @@
+package com.example.demo.services.enseignant;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class EnseignantServiceImpl implements IEnseignantService {
+	
+
+}

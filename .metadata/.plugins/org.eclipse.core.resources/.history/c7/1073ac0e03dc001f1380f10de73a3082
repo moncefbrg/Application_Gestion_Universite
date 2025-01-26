@@ -1,0 +1,41 @@
+package com.example.demo.services.classe;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.repositories.IClasse;
+
+public class ClasseServiceImpl implements IClasseService{
+	@Autowired
+	private IClasse iClasse;
+	@Override
+	public boolean creerClasse(String nom) {
+	    // Vérifier si une classe avec ce nom existe déjà
+	    if (iClasse.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Une classe avec le nom '" + nom + "' existe déjà.");
+	    }
+
+	    // Créer une nouvelle classe
+	    Classe classe = new Classe();
+	    classe.setNom(nom);
+
+	    // Sauvegarder la classe
+	    Classe savedClasse = iClasse.save(classe);
+
+	    // Vérifier si la classe a été correctement sauvegardée
+	    return savedClasse != null && savedClasse.getId() != null;
+	}
+	
+	@Override 
+	public boolean supprimerClasse(String nom) {
+		iClasse.delete(iClasse.findByNom(nom).get());
+		return true;
+	};
+	@Override
+	public boolean modifierClasse(String nom,String nouveauNom) {
+		
+		return true;
+	};
+
+}

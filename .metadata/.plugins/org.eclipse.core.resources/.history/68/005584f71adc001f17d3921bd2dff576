@@ -1,0 +1,10 @@
+package com.example.demo.services.resultatelement;
+
+
+
+public interface IResultatElementService {
+	public boolean ajouterResultat();
+	public boolean modifierResultat();
+	public boolean supprimerResultat();
+
+}

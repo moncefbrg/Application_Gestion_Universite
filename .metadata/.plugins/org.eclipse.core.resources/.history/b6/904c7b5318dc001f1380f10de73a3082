@@ -1,0 +1,107 @@
+package com.example.demo.services.enseignant;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Enseignant;
+import com.example.demo.entities.Module;
+import com.example.demo.repositories.IEnseignant;
+import com.example.demo.repositories.IModule;
+
+@Service
+public class EnseignantServiceImpl implements IEnseignantService {
+	@Autowired
+	IEnseignant iEnseignant;
+	@Autowired
+	IModule iModule;
+	@Override
+	@Transactional
+	public boolean creeEnseignant(Long id, String nom, String prenom, String cni, List<Module> modules) {
+	    // Vérifier que les entrées ne sont pas null ou invalides
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID de l'enseignant ne peut pas être null.");
+	    }
+	    if (nom == null || nom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le nom de l'enseignant ne peut pas être null ou vide.");
+	    }
+	    if (prenom == null || prenom.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le prénom de l'enseignant ne peut pas être null ou vide.");
+	    }
+	    if (cni == null || cni.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Le CNI de l'enseignant ne peut pas être null ou vide.");
+	    }
+	    if (modules == null || modules.isEmpty()) {
+	        throw new IllegalArgumentException("La liste des modules ne peut pas être null ou vide.");
+	    }
+
+	    // Vérifier si un enseignant avec le même ID existe déjà
+	    if (iEnseignant.findById(id).isPresent()) {
+	        throw new RuntimeException("Un enseignant avec l'ID " + id + " existe déjà.");
+	    }
+
+	    // Vérifier si un enseignant avec le même CNI existe déjà
+	    if (iEnseignant.findByCni(cni).isPresent()) {
+	        throw new RuntimeException("Un enseignant avec le CNI " + cni + " existe déjà.");
+	    }
+
+	    // Vérifier si tous les modules existent
+	    List<String> modulesManquants = modules.stream()
+	    		.map(Module->Module.getNom())
+	            .filter(moduleNom -> iModule.findByNom(moduleNom).isEmpty())
+	            .collect(Collectors.toList());
+	            
+
+	    if (!modulesManquants.isEmpty()) {
+	        throw new RuntimeException("Les modules suivants n'existent pas : " + modulesManquants);
+	    }
+
+	    // Créer l'enseignant
+	    Enseignant enseignant = Enseignant.builder()
+	            .id(id)
+	            .nom(nom)
+	            .prenom(prenom)
+	            .cni(cni)
+	            .modules(modules)
+	            .build();
+
+	    // Sauvegarder l'enseignant
+	    iEnseignant.save(enseignant);
+
+	    return true; // Retourne true si la création est réussie
+	}
+
+	@Override
+	@Transactional
+	public boolean supprimerEnseignant(Long id) {
+	    // Vérifier que l'ID n'est pas null
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID de l'enseignant ne peut pas être null.");
+	    }
+
+	    // Rechercher l'enseignant par son ID
+	    Optional<Enseignant> enseignantOptional = iEnseignant.findById(id);
+	    if (enseignantOptional.isEmpty()) {
+	        throw new RuntimeException("L'enseignant avec l'ID " + id + " n'existe pas.");
+	    }
+
+	    // Récupérer l'enseignant à supprimer
+	    Enseignant enseignant = enseignantOptional.get();
+
+	    // Supprimer l'enseignant
+	    iEnseignant.delete(enseignant);
+
+	    return true; // Retourne true si la suppression est réussie
+	}
+	@Override
+	public boolean modifierEnseignant(Long id, String nom, String prenom, String cni, List<Module> modules) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+
+}

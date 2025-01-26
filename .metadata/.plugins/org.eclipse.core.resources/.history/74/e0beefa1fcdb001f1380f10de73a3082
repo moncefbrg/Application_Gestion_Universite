@@ -1,0 +1,31 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.INiveau;
+
+import jakarta.transaction.Transactional;
+@Service
+public class NiveauServiceImpl implements INiveauService{
+	@Autowired
+	private INiveau iNiveau;
+	@Transactional
+	public boolean creerNiveau(Long id,String nom,String alias,Niveau niveauSuivant,List<Module> modules,Seuil seuil,Formule formules)throws Exception {
+		Niveau n=new Niveau();
+		if(iNiveau.findById(id).isPresent()) { throw new RuntimeException("l'id de  la classe avec "+id+"exsite deja");}else {n.setId(id);}
+		Niveau niv=iNiveau.findByNom(nom);
+		if(niv==null) { throw new RuntimeException("le nom de la classe"+nom+"exsite deja");}else {n.setNom(nom);}
+
+		n.setAlias(alias);
+		
+		
+		return false;
+	};
+
+}

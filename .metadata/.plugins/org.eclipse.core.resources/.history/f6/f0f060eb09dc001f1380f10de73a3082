@@ -1,0 +1,7 @@
+package com.example.demo.services.classe;
+
+public interface IClasseService {
+	public boolean creerClasse(String nom);
+	public boolean supprimerClasse(String nom);
+	public boolean modifierClasse(String nom,String nouveauNom);
+}

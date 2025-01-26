@@ -3,6 +3,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,13 +13,14 @@ import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.entities.Classe;
 import com.example.demo.entities.Etudiant;
 import com.example.demo.entities.Niveau;
+import com.example.demo.repositories.IClasse;
 import com.example.demo.repositories.IEtudiant;
 import com.example.demo.repositories.INiveau;
 import com.example.demo.services.fichierexcel.IFichierExcelService;
 
-import jakarta.transaction.Transactional;
 @Service
 public class EtudiantServiceimpl implements IEtudiantService{
 	@Autowired
@@ -27,6 +29,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	private IEtudiant ietudiant;
 	@Autowired
 	private INiveau iNiveau;
+	@Autowired
+	private IClasse iClasse;
 	@Transactional
 	@Override
 	public boolean inscrire(File fichier,List<String> listeTypeColonnes,int nbrColonnes) {
@@ -188,11 +192,6 @@ public class EtudiantServiceimpl implements IEtudiantService{
 		}
 	}
 
-	@Override
-	public List<Etudiant> consulterClasse() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public File exporter() {
@@ -338,4 +337,60 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
         return file;
     }
+	@Override
+	public boolean ajouterEtudiant(Long id, String nom, String prenom, String cne, String aliasNiveau, String nomClasse) throws Exception {
+	    // Vérifier si l'étudiant existe déjà par son CNE (éviter les doublons)
+		Etudiant etudiant1=ietudiant.findByCne(cne);
+	    if (!(etudiant1==null)) {
+	        throw new Exception("Un étudiant avec le CNE '" + cne + "' existe déjà.");
+	    }
+
+	    // Trouver la classe par son nom
+	    Classe classe = iClasse.findByNom(nomClasse)
+	            .orElseThrow(() -> new Exception("Classe avec le nom '" + nomClasse + "' non trouvée."));
+
+	    // Trouver le niveau par son alias
+	    Niveau niveau = iNiveau.findByAlias(aliasNiveau)
+	    		.orElseThrow(() -> new Exception("Niveau avec l'alias '" + aliasNiveau + "' non trouvé."));
+
+	    // Créer l'étudiant
+	    Etudiant etudiant = Etudiant.builder()
+	            .id(id)
+	            .nom(nom)
+	            .prenom(prenom)
+	            .cne(cne)
+	            .classe(classe)
+	            .niveau(niveau)
+	            .modules(niveau.getModules()) // Associer les modules du niveau à l'étudiant
+	            .build();
+
+	    // Enregistrer l'étudiant
+	    ietudiant.save(etudiant);
+
+	    return true; // Retourner true si l'étudiant a été ajouté avec succès
+	}
+
+
+	@Override
+	@Transactional
+	public boolean supprimerEtudiant(Long id) {
+	    // Vérifier que l'ID n'est pas null
+	    if (id == null) {
+	        throw new IllegalArgumentException("L'ID de l'étudiant ne peut pas être null.");
+	    }
+
+	    // Rechercher l'étudiant par son ID
+	    Optional<Etudiant> etudiantOptional = ietudiant.findById(id);
+	    if (etudiantOptional.isEmpty()) {
+	        throw new RuntimeException("L'étudiant avec l'ID " + id + " n'existe pas.");
+	    }
+
+	    // Récupérer l'étudiant à supprimer
+	    Etudiant etudiant = etudiantOptional.get();
+
+	    // Supprimer l'étudiant
+	    ietudiant.delete(etudiant);
+
+	    return true; // Retourne true si la suppression est réussie
+	}
 }

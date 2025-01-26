@@ -13,7 +13,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FichierExcelServiceimpl implements IFichierExcelService {
@@ -395,5 +397,223 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
         cell.setCellStyle(style);
         return cell;
     }
+    @Override
+    public boolean validateExcelStructure(String filePath) {
+        try (FileInputStream file = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(file)) {
 
+            Sheet sheet = workbook.getSheetAt(0); // Supposons que la structure est dans la première feuille
+
+            // Vérifier les en-têtes
+            if (!validateHeaders(sheet)) {
+                System.out.println("Échec de la validation des en-têtes.");
+                return false;
+            }
+
+            // Vérifier la structure des modules
+            if (!validateModuleStructure(sheet)) {
+                System.out.println("Échec de la validation de la structure des modules.");
+                return false;
+            }
+
+            // Vérifier les cellules fusionnées
+            if (!validateMergedCells(sheet)) {
+                System.out.println("Échec de la validation des cellules fusionnées.");
+                return false;
+            }
+
+            // Vérifier le contenu des données
+            if (!validateDataContent(sheet)) {
+                System.out.println("Échec de la validation du contenu des données.");
+                return false;
+            }
+
+            System.out.println("Le fichier Excel respecte la structure et le contenu.");
+            return true;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean validateHeaders(Sheet sheet) {
+        Row headerRow = sheet.getRow(0);
+        Row classRow = sheet.getRow(2);
+        Row moduleHeaderRow = sheet.getRow(4);
+
+        if (headerRow == null || classRow == null || moduleHeaderRow == null) {
+            System.out.println("Une ou plusieurs lignes d'en-tête sont manquantes.");
+            return false;
+        }
+
+        // Vérifier les en-têtes de la première ligne
+        if (!getCellValue(headerRow, 0).equals("Annee universitaire")) {
+            System.out.println("L'en-tête 'Annee universitaire' est manquant ou incorrect.");
+            return false;
+        }
+        if (!getCellValue(headerRow, 2).equals("Date deliberation")) {
+            System.out.println("L'en-tête 'Date deliberation' est manquant ou incorrect.");
+            return false;
+        }
+
+        // Vérifier les en-têtes de la ligne de classe
+        if (!getCellValue(classRow, 0).equals("Classe")) {
+            System.out.println("L'en-tête 'Classe' est manquant ou incorrect.");
+            return false;
+        }
+
+        // Vérifier les en-têtes des modules
+        if (!getCellValue(moduleHeaderRow, 0).equals("ID ETUDIANT") ||
+            !getCellValue(moduleHeaderRow, 1).equals("CNE") ||
+            !getCellValue(moduleHeaderRow, 2).equals("NOM") ||
+            !getCellValue(moduleHeaderRow, 3).equals("PRENOM")) {
+            System.out.println("Les en-têtes des modules sont manquants ou incorrects.");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean validateModuleStructure(Sheet sheet) {
+        Row moduleHeaderRow = sheet.getRow(4);
+        Row elementHeaderRow = sheet.getRow(5);
+
+        if (moduleHeaderRow == null || elementHeaderRow == null) {
+            System.out.println("Les lignes d'en-tête des modules ou des éléments sont manquantes.");
+            return false;
+        }
+
+        int cellIndex = 4; // Commence à la colonne E (index 4)
+        while (cellIndex < moduleHeaderRow.getLastCellNum()-2) {
+            String moduleHeader = getCellValue(moduleHeaderRow, cellIndex);
+            if (moduleHeader == null || !moduleHeader.contains("(")) {
+                System.out.println("Le nom du module ou de l'enseignant est manquant ou incorrect à la colonne " + cellIndex);
+                System.out.println(moduleHeader+moduleHeader.contains("("));
+                return false;
+            }
+
+            // Vérifier les sous-en-têtes
+            if (!getCellValue(elementHeaderRow, cellIndex).equals("nom element 1")) {
+                System.out.println("L'élément 'nom element 1' est manquant ou incorrect à la colonne " + cellIndex);
+                return false;
+            }
+            if (!getCellValue(elementHeaderRow, cellIndex + 1).equals("nom element 2")) {
+                System.out.println("L'élément 'nom element 2' est manquant ou incorrect à la colonne " + (cellIndex + 1));
+                return false;
+            }
+
+            cellIndex += 4; // Passer à la prochaine série de modules
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean validateMergedCells(Sheet sheet) {
+        Set<CellRangeAddress> expectedMergedRegions = new HashSet<>();
+
+        // Cellules fusionnées pour les en-têtes des étudiants
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, 0, 0)); // ID ETUDIANT (A5:A6)
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, 1, 1)); // CNE (B5:B6)
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, 2, 2)); // NOM (C5:C6)
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, 3, 3)); // PRENOM (D5:D6)
+
+        // Cellules fusionnées pour les modules
+        int cellIndex = 4; // Commence à la colonne E (index 4)
+        while (cellIndex < sheet.getRow(4).getLastCellNum() - 2) { // Ignorer les 2 dernières colonnes (Moyenne generale et Rang)
+            expectedMergedRegions.add(new CellRangeAddress(4, 4, cellIndex, cellIndex + 1)); // Nom module + enseignant (fusion horizontale)
+            expectedMergedRegions.add(new CellRangeAddress(4, 5, cellIndex + 2, cellIndex + 2)); // Moyenne (fusion verticale)
+            expectedMergedRegions.add(new CellRangeAddress(4, 5, cellIndex + 3, cellIndex + 3)); // Validation (fusion verticale)
+            cellIndex += 4; // Passer à la prochaine série de modules
+        }
+
+        // Cellules fusionnées pour "Moyenne generale" et "Rang"
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, cellIndex, cellIndex)); // Moyenne generale (Q5:Q6)
+        expectedMergedRegions.add(new CellRangeAddress(4, 5, cellIndex + 1, cellIndex + 1)); // Rang (R5:R6)
+
+        // Comparer avec les cellules fusionnées réelles
+        for (CellRangeAddress mergedRegion : sheet.getMergedRegions()) {
+            if (!expectedMergedRegions.contains(mergedRegion)) {
+                System.out.println("La cellule fusionnée " + mergedRegion.formatAsString() + " n'est pas attendue.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    
+    @Override
+    public boolean validateDataContent(Sheet sheet) {
+        // Commencer à la ligne 6 (première ligne de données)
+        for (int rowIndex = 6; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+            Row row = sheet.getRow(rowIndex);
+            if (row == null) {
+                System.out.println("La ligne " + rowIndex + " est vide.");
+                return false;
+            }
+
+            // Vérifier les données de l'étudiant
+            for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+                Cell cell = row.getCell(cellIndex);
+                if (cell == null) {
+                    System.out.println("La cellule à la ligne " + rowIndex + ", colonne " + cellIndex + " est vide.");
+                    return false;
+                }
+
+                // Vérifier les types de données
+                switch (cellIndex) {
+                    case 0: // ID ETUDIANT
+                    case 1: // CNE
+                    case 2: // NOM
+                    case 3: // PRENOM
+                        if (cell.getCellType() != CellType.STRING) {
+                            System.out.println("La cellule à la ligne " + rowIndex + ", colonne " + cellIndex + " doit contenir du texte.");
+                            return false;
+                        }
+                        break;
+                    case 4: // nom element 1
+                    case 6: // moyenne
+                    case 8: // nom element 1
+                    case 10: // moyenne
+                    case 12: // nom element 1
+                    case 14: // moyenne
+                        if (cell.getCellType() != CellType.STRING) {
+                            System.out.println("La cellule à la ligne " + rowIndex + ", colonne " + cellIndex + " doit contenir un nombre.");
+                            return false;
+                        }
+                        break;
+                    case 5: // nom element 2
+                    case 7: // validation
+                    case 9: // nom element 2
+                    case 11: // validation
+                    case 13: // nom element 2
+                    case 15: // validation
+                        if (cell.getCellType() != CellType.STRING) {
+                            System.out.println("La cellule à la ligne " + rowIndex + ", colonne " + cellIndex + " doit contenir du texte.");
+                            return false;
+                        }
+                        break;
+                    case 16: // Moyenne generale
+                    case 17: // Rang
+                        if (cell.getCellType() != CellType.STRING) {
+                            System.out.println("La cellule à la ligne " + rowIndex + ", colonne " + cellIndex + " doit contenir un nombre.");
+                            return false;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public String getCellValue(Row row, int cellIndex) {
+        Cell cell = row.getCell(cellIndex);
+        return cell == null ? null : cell.getStringCellValue();
+    }
 }

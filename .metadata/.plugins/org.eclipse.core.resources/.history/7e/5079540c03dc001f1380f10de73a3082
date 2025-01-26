@@ -1,0 +1,5 @@
+package com.example.demo.services.classe;
+
+public interface IClasseService {
+	public boolean creerClasse(String nom);
+}

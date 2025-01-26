@@ -1,0 +1,11 @@
+package com.example.demo.services.classe;
+
+import com.example.demo.entities.Etudiant;
+
+public interface IClasseService {
+	public boolean creerClasse(String nom);
+	public boolean supprimerClasse(String nom);
+	public boolean modifierClasse(String nom,String nouveauNom);
+	public boolean ajouterEtudiantClasse(String nom,Long id);
+	public boolean supprimerEtudiantClasse(String nom,Long id);
+}

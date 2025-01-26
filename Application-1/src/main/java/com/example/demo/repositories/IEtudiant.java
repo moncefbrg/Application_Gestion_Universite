@@ -10,5 +10,7 @@ import com.example.demo.entities.Etudiant;
 public interface IEtudiant extends JpaRepository<Etudiant, Long>{
 	public Optional<Etudiant> findById(Long id);
 	List<Etudiant> findByCneOrNomOrPrenomOrNiveauId(String cne, String nom, String prenom, Long niveauId);
+	List<Etudiant> findByModulesId(Long moduleId); //retourne les etudiants inscrits à un module
+	Etudiant findByCne(String cne);
 	
 }

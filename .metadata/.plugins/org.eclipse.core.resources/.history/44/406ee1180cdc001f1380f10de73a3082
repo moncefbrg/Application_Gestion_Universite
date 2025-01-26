@@ -1,0 +1,60 @@
+package com.example.demo.services.classe;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Classe;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.repositories.IClasse;
+import com.example.demo.repositories.IEtudiant;
+
+public class ClasseServiceImpl implements IClasseService{
+	@Autowired
+	private IClasse iClasse;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Override
+	public boolean creerClasse(String nom) {
+	    // Vérifier si une classe avec ce nom existe déjà
+	    if (iClasse.findByNom(nom).isPresent()) {
+	        throw new RuntimeException("Une classe avec le nom '" + nom + "' existe déjà.");
+	    }
+
+	    // Créer une nouvelle classe
+	    Classe classe = new Classe();
+	    classe.setNom(nom);
+
+	    // Sauvegarder la classe
+	    Classe savedClasse = iClasse.save(classe);
+
+	    // Vérifier si la classe a été correctement sauvegardée
+	    return savedClasse != null && savedClasse.getId() != null;
+	}
+	
+	@Override @Transactional
+	public boolean supprimerClasse(String nom) {
+		iClasse.delete(iClasse.findByNom(nom).get());
+		return true;
+	};
+	@Override @Transactional
+	public boolean modifierClasse(String nom,String nouveauNom) {
+		Classe classe=iClasse.findByNom(nom).get();
+		classe.setNom(nouveauNom);
+		return true;
+	}
+
+	@Override
+	public boolean ajouterEtudiantClasse(String nom, Long id) {
+		Classe classe=iClasse.findByNom(nom).get();
+		Etudiant etudiant=iEtudiant.findById(id).get();
+		if(iEtudiant.findById(id).isPresent() && iClasse.findByNom(nom).isPresent() && classe.getEtudiants().contains(nom)) {}
+		return false;
+	}
+
+	@Override
+	public boolean supprimerEtudiantClasse(String nom, Long id) {
+		// TODO Auto-generated method stub
+		return false;
+	};
+
+}

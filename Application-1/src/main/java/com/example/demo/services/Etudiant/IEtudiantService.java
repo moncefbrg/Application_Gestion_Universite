@@ -10,12 +10,14 @@ public interface IEtudiantService {
 	public List<Etudiant> chercherEtudiant(String cne,String nom,String prenom,Long niveau);//done
 	public boolean checkExistanceNiveau(Long id);//done
 	public boolean checkNiveau();//results
-	public boolean inscription(File fichier,List<String> liste,int nbrColonnes);
-	public Etudiant modifierEtudiant(Long id,String cne,String nom,String prenom,Long niveau);
-	public List<Etudiant> consulterClasse();
-	public boolean creerEtSauvegarderEtudiantFromExcel(List<String> ligneData);
+	public boolean inscription(File fichier,List<String> liste,int nbrColonnes);//done+
+	public Etudiant modifierEtudiant(Long id,String cne,String nom,String prenom,Long niveau);//done+
+	public boolean creerEtSauvegarderEtudiantFromExcel(List<String> ligneData);//done+
 	public File exporter();
-	public File creationFichierNoteExcel(String classe,String session,String enseignant,String semestre,String module,String path)throws IOException;
+	public File creationFichierNoteExcel(String classe,String session,String enseignant,String semestre,String module,String path)throws IOException;//done+
+	public boolean ajouterEtudiant(Long id,String nom,String prenom,String cne,String aliasNiveau,String Classe)throws Exception;//done+
+	public boolean supprimerEtudiant(Long id);//done
+	
 	
 	
 
