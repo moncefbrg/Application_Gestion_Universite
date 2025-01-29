@@ -1,0 +1,10 @@
+package com.example.demo.services.element;
+
+import com.example.demo.entities.Element;
+
+public interface IElementService {
+	public Element creerElement(Long id,String nom);
+	public Element modifierElement(Long id,String ancienNom,String nouveauNom);
+	public boolean supprimerElement(Long id);
+
+}

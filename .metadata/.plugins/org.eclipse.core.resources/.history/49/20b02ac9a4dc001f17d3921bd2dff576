@@ -1,0 +1,27 @@
+package com.example.demo.services.element;
+
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+
+public class ElementServiceImpl implements IElementService{
+
+	@Override @Transactional
+	public Element creerElement(Long id, String nom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override @Transactional
+	public Element modifierElement(Long id, String ancienNom, String nouveauNom) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override @Transactional
+	public boolean supprimerElement(Long id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

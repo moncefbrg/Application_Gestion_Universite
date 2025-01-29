@@ -1,0 +1,54 @@
+package com.example.demo.services.seuil;
+
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.ISeuil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SeuilServiceImpl implements ISeuilService {
+
+    @Autowired
+    private ISeuil seuilRepository;
+
+    @Override
+    public Seuil creerSeuil(Long id, double xNormale, double yRattrapage) {
+        // Utilisation du Builder pour créer un objet Seuil
+        Seuil seuil = Seuil.Builder()
+            .setId(id)
+            .setXNormale(xNormale)
+            .setYRattrapage(yRattrapage)
+            .build();
+        
+        // Sauvegarde de l'objet Seuil dans la base de données via le repository
+        return seuilRepository.save(seuil);
+    }
+
+    @Override
+    public Seuil modifierSeuil(Long id, double nXNormale, double nYRattrapage) {
+        // Recherche l'objet Seuil existant dans la base de données
+        Seuil seuil = seuilRepository.findById(id).orElse(null);
+        if (seuil != null) {
+            // Mise à jour des valeurs de seuil en utilisant le Builder
+            seuil = new Seuil.Builder()
+                .setId(id) // Garder le même ID
+                .setXNormale(nXNormale)
+                .setYRattrapage(nYRattrapage)
+                .build();
+            
+            // Sauvegarde des modifications dans la base de données
+            return seuilRepository.save(seuil);
+        }
+        return null; // Si l'objet Seuil n'existe pas, renvoie null
+    }
+
+    @Override
+    public boolean supprimerSeuil(Long id) {
+        // Recherche l'objet Seuil et le supprime s'il existe
+        if (seuilRepository.existsById(id)) {
+            seuilRepository.deleteById(id);
+            return true; // Suppression réussie
+        }
+        return false; // Si l'objet Seuil n'existe pas, retourne false
+    }
+}

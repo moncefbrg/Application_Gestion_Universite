@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,8 @@ public class ResultatElement {
 	@ManyToOne
 	@JoinColumn(name="etudiant_id")
 	private Etudiant etudiant;
-	
+	@OneToOne
+    private Deliberation deliberation;
 	@ManyToOne
 	@JoinColumn(name="element_id")
 	private Element element;

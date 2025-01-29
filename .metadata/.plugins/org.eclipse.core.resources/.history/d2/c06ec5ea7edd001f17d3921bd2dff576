@@ -1,0 +1,71 @@
+package com.example.demo.services.moduleetudiant;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.repositories.IEtudiant;
+import com.example.demo.repositories.IModule;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Etudiant;
+
+@Service
+public class ModuleEtudiantServiceImpl implements IModuleEtudiantService{
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Autowired
+	private IModule iModule;
+	  @Override @Transactional
+	    public boolean associerEtudiantModule(Etudiant etudiant, Module module) throws Exception {
+	        // Vérification si l'étudiant existe
+	        if (etudiant == null || !iEtudiant.existsById(etudiant.getId())) {
+	            throw new Exception("Étudiant non trouvé.");
+	        }
+
+	        // Vérification si le module existe
+	        if (module == null || !iModule.existsById(module.getId())) {
+	            throw new Exception("Module non trouvé.");
+	        }
+
+	        // Vérification si l'étudiant est déjà inscrit à ce module
+	        if (etudiant.getModules().contains(module)) {
+	            throw new Exception("L'étudiant est déjà inscrit à ce module.");
+	        }
+
+	        // Ajouter le module à la liste des modules de l'étudiant
+	        etudiant.getModules().add(module);
+	        iEtudiant.save(etudiant);  // Sauvegarder l'étudiant avec le module ajouté
+
+	        return true;
+	    }
+	@Override @Transactional
+    public boolean separerEtudiantModule(Etudiant etudiant, Module module) throws Exception {
+		if (module == null) {
+	        throw new RuntimeException("Le module ne peut pas être null.");
+	    }
+	    if (etudiant == null) {
+	        throw new RuntimeException("L'etudiant ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de l'etudiant dans la base de données
+	    if (iEtudiant.findById(etudiant.getId()).isEmpty()) {
+	        throw new RuntimeException("L'etudiant avec l'ID " + etudiant.getId() + " n'existe pas.");
+	    }
+
+	    // Vérification de l'existence du module dans la base de données
+	    if (iModule.findById(module.getId()).isEmpty()) {
+	        throw new RuntimeException("Le module avec l'ID " + module.getId() + " n'existe pas.");
+	    }
+	    if (!(iModule.findById(module.getId()).get()==g)) {
+	        throw new RuntimeException("Le module avec l'ID " + module.getId() + " est deja associer a un autre enseignant.");
+	    }
+
+        
+        
+        // Séparation de l'étudiant et du module
+        //i.delete(association);
+
+        return true;
+    }
+	
+}

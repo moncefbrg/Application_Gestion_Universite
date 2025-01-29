@@ -20,14 +20,15 @@ public interface IFichierExcelService {
 	public String lireValeurCellule(Cell cell);
 	public String verifierFormatFichierExcel(File file) throws IOException;//retourne soit xls , xlsx ,inconnu
 	public boolean verifierNotesFichierExcel(File file) throws Exception;
-	public File createExcelFile(String path, String anneeUniversitaire, String dateDeliberation, String classe,
-            List<String> modules, List<String> enseignants, List<String> etudiants) throws IOException;
-    public Cell createCell(Row row, int column, String value, CellStyle style);
+	public File creationFichierDeliberation(String path, String dateDeliberation, String classe) throws IOException;
+    public Cell createCell(Row row, int cellIndex, Object value, CellStyle style);
     public  boolean validateExcelStructure(String filePath);//verfife la structure du fichier de deliberation
     public String getCellValue(Row row, int cellIndex);
     public boolean validateMergedCells(Sheet sheet);
     public boolean validateModuleStructure(Sheet sheet);
     public boolean validateDataContent(Sheet sheet);
     public boolean validateHeaders(Sheet sheet);
-	
+    public String getColumnLetter(int columnNumber);
+	public File creationFichierNoteExcel(String classe, String session, String module, String path)throws IOException;//classe notes
+
 }

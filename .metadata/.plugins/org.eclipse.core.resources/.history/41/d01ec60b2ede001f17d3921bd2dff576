@@ -1,0 +1,26 @@
+package com.example.demo.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Entity @Data @ToString @AllArgsConstructor @NoArgsConstructor @Builder
+public class Deliberation {
+
+	@Id
+	private Long id;
+	@ManyToOne
+    @JoinColumn(name = "id_module", nullable = false)
+    private Module module;  
+
+    @Column(name = "note_finale")
+    private Double noteFinale;
+	
+}

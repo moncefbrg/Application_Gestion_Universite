@@ -7,9 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.Year;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,8 +31,16 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	private IClasse iClasse;
 	@Transactional
 	@Override
-	public boolean inscrire(File fichier,List<String> listeTypeColonnes,int nbrColonnes) {
-	    return inscription(fichier,listeTypeColonnes,nbrColonnes);
+	public boolean inscrire(File fichier) throws Exception{
+		List<String> listeTypeColonnes=Arrays.asList("NUMERIC","STRING","STRING","STRING","NUMERIC","STRING");
+		try {
+			if(ifichierexcelservice.checkFormat(fichier, listeTypeColonnes, 6)) {
+			return inscription(fichier,listeTypeColonnes,6);}else {return false;}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	
 	}
 
 
@@ -62,11 +68,13 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	        // Vérifier si l'étudiant existe déjà
 	        Optional<Etudiant> etudiantOpt = ietudiant.findById(idEtudiant);
+	        Etudiant etudiantOpt2 = ietudiant.findByCne(cne);
+
 
 	        // Traiter en fonction du type
 	        if ("Inscription".equalsIgnoreCase(type)) {
 	            // Cas : Inscription
-	            if (etudiantOpt.isPresent()) {
+	            if (etudiantOpt.isPresent() || etudiantOpt2!=null) {
 	                System.err.println("Erreur : L'étudiant avec l'ID " + idEtudiant + " existe déjà. Impossible de l'inscrire.");
 	                return false;
 	            }
@@ -87,7 +95,11 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	            if (etudiantOpt.isEmpty()) {
 	                System.err.println("Erreur : L'étudiant avec l'ID " + idEtudiant + " n'existe pas. Impossible de le réinscrire.");
 	                return false;
+	            }if (etudiantOpt.get().getNiveau().getNiveauSuivant()!=niveau) {
+	            	System.err.println("Erreur : L'étudiant avec l'ID " + idEtudiant + " son niveau est contradictoire avec son ancien niveau");
+	                return false;
 	            }
+					
 
 	            // Modifier le niveau de l'étudiant existant
 	            Etudiant etudiant = etudiantOpt.get();
@@ -122,14 +134,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 		return ietudiant.findByCneOrNomOrPrenomOrNiveauId(cne, nom, prenom, niveau);
 	}
 
-	@Override
-	public boolean checkExistanceNiveau(Long id) {
-		if(!(iNiveau.findById(id).isEmpty())) {
-			return true;
-		}else {
-			return false;
-		}		
-	}
+	
 
 	@Override
 	public boolean checkNiveau() {
@@ -199,144 +204,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 		return null;
 	}
 	
-	@Override
-    public File creationFichierNoteExcel(String classe, String session, String enseignant, String semestre, String module, String path) throws IOException {
-        // Créer un nouveau classeur Excel
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Notes");
-
-        // Obtenir l'année actuelle et l'année suivante
-        Year currentYear = Year.now();
-        String anneeScolaire = currentYear + "/" + (currentYear.getValue() + 1);
-
-        // Créer une police pour le style des en-têtes
-        Font headerFont = workbook.createFont();
-        headerFont.setBold(true);
-        headerFont.setFontHeightInPoints((short) 12);
-        headerFont.setColor(IndexedColors.WHITE.getIndex()); // Texte en blanc
-
-        // Créer un style pour les en-têtes
-        CellStyle headerCellStyle = workbook.createCellStyle();
-        headerCellStyle.setFont(headerFont);
-        headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex()); // Fond bleu clair
-        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        headerCellStyle.setBorderTop(BorderStyle.THIN); // Bordure en haut
-        headerCellStyle.setBorderBottom(BorderStyle.THIN); // Bordure en bas
-        headerCellStyle.setBorderLeft(BorderStyle.THIN); // Bordure à gauche
-        headerCellStyle.setBorderRight(BorderStyle.THIN); // Bordure à droite
-        headerCellStyle.setAlignment(HorizontalAlignment.CENTER); // Centrer le texte
-
-        // Créer un style pour la ligne vide
-        CellStyle laLigneVide = workbook.createCellStyle();
-        laLigneVide.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex()); // Fond gris
-        laLigneVide.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        laLigneVide.setBorderTop(BorderStyle.THIN); // Bordure en haut
-        laLigneVide.setBorderBottom(BorderStyle.THIN); // Bordure en bas
-        laLigneVide.setBorderLeft(BorderStyle.THIN); // Bordure à gauche
-        laLigneVide.setBorderRight(BorderStyle.THIN); // Bordure à droite
-
-        // Créer un style pour les cellules de données
-        CellStyle dataCellStyle = workbook.createCellStyle();
-        dataCellStyle.setBorderTop(BorderStyle.THIN); // Bordure en haut
-        dataCellStyle.setBorderBottom(BorderStyle.THIN); // Bordure en bas
-        dataCellStyle.setBorderLeft(BorderStyle.THIN); // Bordure à gauche
-        dataCellStyle.setBorderRight(BorderStyle.THIN); // Bordure à droite
-        dataCellStyle.setAlignment(HorizontalAlignment.CENTER); // Centrer le texte
-
-        // Créer la première ligne pour les en-têtes
-        Row headerRow1 = sheet.createRow(0);
-        String[] headers1 = {"Module", module, "Semestre", semestre, "Année", anneeScolaire};
-        for (int i = 0; i < headers1.length; i++) {
-            Cell cell = headerRow1.createCell(i);
-            cell.setCellValue(headers1[i]);
-            cell.setCellStyle(headerCellStyle);
-        }
-
-        // Créer la deuxième ligne pour les en-têtes
-        Row headerRow2 = sheet.createRow(1);
-        String[] headers2 = {"Enseignant", enseignant, "Session", session, "Classe", classe};
-        for (int i = 0; i < headers2.length; i++) {
-            Cell cell = headerRow2.createCell(i);
-            cell.setCellValue(headers2[i]);
-            cell.setCellStyle(headerCellStyle);
-        }
-
-        // Créer une ligne vide avec un fond gris
-        Row headerRowVide = sheet.createRow(2);
-        for (int i = 0; i < headers1.length; i++) {
-            Cell cell = headerRowVide.createCell(i);
-            cell.setCellStyle(laLigneVide); // Appliquer le style de la ligne vide
-        }
-
-        // Créer la quatrième ligne pour les en-têtes
-        Row headerRow4 = sheet.createRow(3);
-        String[] headers4 = {"ID", "CNE", "NOM", "PRENOM", "ELEMENT 1", "ELEMENT 2", "MOYENNE", "VALIDATION"};
-        for (int i = 0; i < headers4.length; i++) {
-            Cell cell = headerRow4.createCell(i);
-            cell.setCellValue(headers4[i]);
-            cell.setCellStyle(headerCellStyle);
-        }
-
-     // Exemple de données (à remplacer par vos données réelles)
-        Row dataRow = sheet.createRow(4);
-        String[] data = {"1", "A12345", "Dupont", "Jean"}; // Données pour ID, CNE, NOM, PRENOM
-        double[] suiteData = {15.5, 18.2}; // Données pour ELEMENT 1 et ELEMENT 2
-
-        // Remplir les données pour ID, CNE, NOM, PRENOM
-        for (int i = 0; i < data.length; i++) {
-            Cell cell = dataRow.createCell(i);
-            cell.setCellValue(data[i]);
-            cell.setCellStyle(dataCellStyle); // Appliquer le style
-        }
-
-        // Remplir les données pour ELEMENT 1 et ELEMENT 2
-        for (int i = 0; i < suiteData.length; i++) {
-            Cell cell = dataRow.createCell(4 + i); // Colonnes E (index 4) et F (index 5)
-            cell.setCellValue(suiteData[i]);
-            cell.setCellStyle(dataCellStyle); // Appliquer le style
-        }
-
-        // Ajouter la formule pour la MOYENNE (colonne G)
-        Cell moyenneCell = dataRow.createCell(6); // Colonne G (index 6)
-        moyenneCell.setCellFormula("SUM(E5,F5)/2"); // Formule pour la moyenne de ELEMENT 1 et ELEMENT 2
-        moyenneCell.setCellStyle(dataCellStyle);
-
-        // Ajouter la formule pour la VALIDATION (colonne H)
-        Cell validationCell = dataRow.createCell(7); // Colonne H (index 7)
-        validationCell.setCellFormula("IF(G5>=10,\"Validé\",\"Non validé\")"); // Formule pour la validation
-        validationCell.setCellStyle(dataCellStyle);
-        // Ajuster la largeur des colonnes
-        for (int i = 0; i < headers4.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        // Créer le dossier s'il n'existe pas
-        File resourcesDir = new File(path);
-        if (!resourcesDir.exists()) {
-            resourcesDir.mkdirs();
-        }
-
-        // Générer un nom de fichier unique
-        String baseFileName = "Notes_" + classe + "_" + session;
-        String fileExtension = ".xlsx";
-        File file = new File(path + File.separator + baseFileName + fileExtension);
-
-        // Vérifier si le fichier existe déjà
-        int counter = 1;
-        while (file.exists()) {
-            file = new File(path + File.separator + baseFileName + "_" + counter + fileExtension);
-            counter++;
-        }
-
-        // Écrire le fichier Excel
-        try (FileOutputStream fileOut = new FileOutputStream(file)) {
-            workbook.write(fileOut);
-        } finally {
-            workbook.close();
-        }
-
-        return file;
-    }
+	
 	@Override
 	public boolean ajouterEtudiant(Long id, String nom, String prenom, String cne, String aliasNiveau, String nomClasse) throws Exception {
 	    // Vérifier si l'étudiant existe déjà par son CNE (éviter les doublons)
@@ -345,13 +213,14 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	        throw new Exception("Un étudiant avec le CNE '" + cne + "' existe déjà.");
 	    }
 
-	    // Trouver la classe par son nom
-	    Classe classe = iClasse.findByNom(nomClasse)
-	            .orElseThrow(() -> new Exception("Classe avec le nom '" + nomClasse + "' non trouvée."));
-
+	    if(!(nomClasse==null)) {// Trouver la classe par son nom
+		    iClasse.findByNom(nomClasse)
+		            .orElseThrow(() -> new Exception("Classe avec le nom '" + nomClasse + "' non trouvée."));
+}
 	    // Trouver le niveau par son alias
 	    Niveau niveau = iNiveau.findByAlias(aliasNiveau)
 	    		.orElseThrow(() -> new Exception("Niveau avec l'alias '" + aliasNiveau + "' non trouvé."));
+	    
 
 	    // Créer l'étudiant
 	    Etudiant etudiant = Etudiant.builder()
@@ -359,7 +228,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	            .nom(nom)
 	            .prenom(prenom)
 	            .cne(cne)
-	            .classe(classe)
+	            .classe(nomClasse==null?null:iClasse.findByNom(nomClasse).get())
 	            .niveau(niveau)
 	            .modules(niveau.getModules()) // Associer les modules du niveau à l'étudiant
 	            .build();
@@ -393,4 +262,70 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    return true; // Retourne true si la suppression est réussie
 	}
+	@Override
+	@Transactional
+	public boolean associerEtudiantClasse(Classe classe, Etudiant etudiant) throws Exception {
+	    // Vérification des nullités
+	    if (classe == null) {
+	        throw new RuntimeException("La classe ne peut pas être null.");
+	    }
+	    if (etudiant == null) {
+	        throw new RuntimeException("L'étudiant ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de la classe dans la base de données
+	    Classe classeBD = iClasse.findById(classe.getId())
+	            .orElseThrow(() -> new RuntimeException("La classe avec l'ID " + classe.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence de l'étudiant dans la base de données
+	    Etudiant etudiantBD = ietudiant.findById(etudiant.getId())
+	            .orElseThrow(() -> new RuntimeException("L'étudiant avec l'ID " + etudiant.getId() + " n'existe pas."));
+
+	    // Vérification de niveau de l'étudiant par rapport a la classe
+	    if (etudiantBD.getNiveau() != classeBD.getNiveau() || etudiantBD.getNiveau().getNiveauSuivant() != classeBD.getNiveau() ) {
+	        throw new RuntimeException("Incoherance de niveau.");
+	    }
+
+	    // Association de l'étudiant à la classe
+	    etudiantBD.setClasse(classeBD);
+
+	    // Sauvegarde des modifications
+	    ietudiant.save(etudiantBD);
+
+	    return true;
+	}
+
+	@Override
+	@Transactional
+	public boolean separerEtudiantClasse(Classe classe, Etudiant etudiant) throws Exception {
+	    // Vérification des nullités
+	    if (classe == null) {
+	        throw new RuntimeException("La classe ne peut pas être null.");
+	    }
+	    if (etudiant == null) {
+	        throw new RuntimeException("L'étudiant ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de la classe dans la base de données
+	    Classe classeBD = iClasse.findById(classe.getId())
+	            .orElseThrow(() -> new RuntimeException("La classe avec l'ID " + classe.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence de l'étudiant dans la base de données
+	    Etudiant etudiantBD = ietudiant.findById(etudiant.getId())
+	            .orElseThrow(() -> new RuntimeException("L'étudiant avec l'ID " + etudiant.getId() + " n'existe pas."));
+
+	    // Vérification que l'étudiant est bien associé à cette classe
+	    if (etudiantBD.getClasse() == null || !etudiantBD.getClasse().getId().equals(classeBD.getId())) {
+	        throw new RuntimeException("L'étudiant n'est pas associé à cette classe.");
+	    }
+
+	    // Séparation de l'étudiant et de la classe
+	    etudiantBD.setClasse(null);
+
+	    // Sauvegarde des modifications
+	    ietudiant.save(etudiantBD);
+
+	    return true;
+	}
+
 }

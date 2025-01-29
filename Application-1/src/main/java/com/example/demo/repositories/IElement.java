@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IElement extends JpaRepository<Element, Long>{
 	Optional<Element> findByNom(String nom);
+	boolean existsByNom(String nom);
 
 }

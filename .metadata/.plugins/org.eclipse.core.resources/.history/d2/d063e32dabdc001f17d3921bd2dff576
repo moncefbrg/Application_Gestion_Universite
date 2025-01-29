@@ -1,0 +1,63 @@
+package com.example.demo.services.formule;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.IFormule;
+
+public class FormuleServiceimpl implements IFormuleService{
+	@Autowired
+	private IFormule iFormule;
+	@Override @Transactional
+	public Formule creerFormule(Long id, String nom, String expression, List<String> param) {
+		// Vérifier si une Formule avec le même ID existe déjà
+        if (iFormule.existsById(id)) {
+            throw new RuntimeException("Une formule avec l'ID " + id + " existe déjà.");
+        }
+
+        // Créer une nouvelle formule en utilisant le Builder (si disponible)
+        Formule formule = Formule.builder()
+                .id(id)
+                .expression(expression)
+                .nom(nom)
+                .parametres(param)
+                .build();
+
+        // Sauvegarder la Formule dans la base de données
+        return iFormule.save(formule);
+    }
+	
+
+	@Override
+	public Formule modifierFormule(Long id, String nouveauNom, String nouvelleExpression, List<String> nParam) {
+		// Récupérer la formule existant par son ID
+		Formule formule = iFormule.findById(id)
+                .orElseThrow(() -> new RuntimeException("La formule non trouvé avec l'ID : " + id));
+
+        // Mettre à jour les valeurs de la formule
+        if(!(nouveauNom==null)) {formule.setNom(nouveauNom);}
+        if(!(nouvelleExpression==null)) {formule.setExpression(nouvelleExpression);}
+        if(!(nParam==null)) {formule.setParametres(nParam);}
+
+        // Sauvegarder les modifications
+        return iFormule.save(formule);
+	}
+
+	@Override @Transactional
+	public boolean supprimerFormule(Long id) {
+		// Vérifier si la Formule existe
+        if (iFormule.existsById(id)) {
+            // Supprimer la Formule
+        	iFormule.deleteById(id);
+            return true;
+        } else {
+            // Retourner false si la formule n'existe pas
+            return false;
+        }
+    }
+
+}

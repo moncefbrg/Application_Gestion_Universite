@@ -1,0 +1,43 @@
+package com.example.demo.entities;
+
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
+import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data @NoArgsConstructor @AllArgsConstructor @ToString @Builder
+public class Module {
+	@Id
+	private Long id;
+	@Column(unique=true)
+	private String nom;
+	private String semestre;
+	
+	@ManyToOne
+	private Niveau niveau;
+	
+	@OneToMany(mappedBy="module")
+	private List<Element> elements;
+	
+	@ManyToMany(mappedBy = "modules")
+    private List<Etudiant> etudiants;
+	
+	@ManyToOne
+	@JoinColumn(name="enseignant_id")
+	private Enseignant enseignant;
+	
+	
+	
+
+}

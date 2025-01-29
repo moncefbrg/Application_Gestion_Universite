@@ -10,16 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entities.Classe;
 import com.example.demo.entities.Etudiant;
+import com.example.demo.entities.Niveau;
 import com.example.demo.repositories.IClasse;
 import com.example.demo.repositories.IEtudiant;
+import com.example.demo.repositories.INiveau;
 @Service
 public class ClasseServiceImpl implements IClasseService{
 	@Autowired
 	private IClasse iClasse;
 	@Autowired
+	private INiveau iNiveau;
+	@Autowired
 	private IEtudiant iEtudiant;
 	@Override
-	public boolean creerClasse(String nom) {
+	public Classe creerClasse(String nom) {
 	    // Vérifier si une classe avec ce nom existe déjà
 	    if (iClasse.findByNom(nom).isPresent()) {
 	        throw new RuntimeException("Une classe avec le nom '" + nom + "' existe déjà.");
@@ -30,10 +34,10 @@ public class ClasseServiceImpl implements IClasseService{
 	    classe.setNom(nom);
 
 	    // Sauvegarder la classe
-	    Classe savedClasse = iClasse.save(classe);
+	    iClasse.save(classe);
 
 	    // Vérifier si la classe a été correctement sauvegardée
-	    return savedClasse != null && savedClasse.getId() != null;
+	    return classe;
 	}
 	
 	@Override @Transactional
@@ -177,4 +181,70 @@ public class ClasseServiceImpl implements IClasseService{
 	    return etudiants != null ? etudiants : Collections.emptyList();
 	}
 
+	@Override
+	@Transactional
+	public boolean associerClasseNiveau(Classe classe, Niveau niveau) throws Exception {
+	    // Vérification des nullités
+	    if (classe == null) {
+	        throw new RuntimeException("La classe ne peut pas être null.");
+	    }
+	    if (niveau == null) {
+	        throw new RuntimeException("Le niveau ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de la classe dans la base de données
+	    Classe classeBD = iClasse.findById(classe.getId())
+	            .orElseThrow(() -> new RuntimeException("La classe avec l'ID " + classe.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence du niveau dans la base de données
+	    Niveau niveauBD = iNiveau.findById(niveau.getId())
+	            .orElseThrow(() -> new RuntimeException("Le niveau avec l'ID " + niveau.getId() + " n'existe pas."));
+
+	    // Vérification que la classe n'est pas déjà associée à un autre niveau
+	    if (classeBD.getNiveau() != null) {
+	        throw new RuntimeException("La classe est déjà associée à un autre niveau.");
+	    }
+
+	    // Association de la classe au niveau
+	    classeBD.setNiveau(niveauBD);
+
+	    // Sauvegarde des modifications
+	    iClasse.save(classeBD);
+
+	    return true;
+	}
+	@Override
+	@Transactional
+	public boolean separerClasseNiveau(Classe classe, Niveau niveau) throws Exception {
+	    // Vérification des nullités
+	    if (classe == null) {
+	        throw new RuntimeException("La classe ne peut pas être null.");
+	    }
+	    if (niveau == null) {
+	        throw new RuntimeException("Le niveau ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de la classe dans la base de données
+	    Classe classeBD = iClasse.findById(classe.getId())
+	            .orElseThrow(() -> new RuntimeException("La classe avec l'ID " + classe.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence du niveau dans la base de données
+	    Niveau niveauBD = iNiveau.findById(niveau.getId())
+	            .orElseThrow(() -> new RuntimeException("Le niveau avec l'ID " + niveau.getId() + " n'existe pas."));
+
+	    // Vérification que la classe est bien associée au niveau
+	    if (classeBD.getNiveau() == null || !classeBD.getNiveau().getId().equals(niveauBD.getId())) {
+	        throw new RuntimeException("La classe n'est pas associée à ce niveau.");
+	    }
+
+	    // Séparation de la classe et du niveau
+	    classeBD.setNiveau(null);
+
+	    // Sauvegarde des modifications
+	    iClasse.save(classeBD);
+
+	    return true;
+	}
+
+	
 }

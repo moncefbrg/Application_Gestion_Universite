@@ -1,0 +1,15 @@
+package com.example.demo.services.niveau;
+
+import java.util.List;
+
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.entities.Module;
+
+public interface INiveauService {
+	public Niveau creerNiveau(Long id,String nom,String alias,Niveau niveauSuivant,Seuil seuil,List<Formule> formules)throws Exception;
+	public boolean modifierNiveau(Long id,String nom,String alias,Niveau niveauSuivant,List<Module> modules,Seuil seuil,List<Formule> formules)throws Exception;
+	public boolean supprimerNiveau(String nom);
+
+}

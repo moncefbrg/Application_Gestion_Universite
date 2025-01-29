@@ -1,0 +1,50 @@
+package com.example.demo.entities;
+
+import java.util.List;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Niveau {
+    @Id
+    private Long id;
+
+    private String nom;
+    private String alias;
+
+    // Relation avec le niveau suivant (unidirectionnelle)
+    @OneToOne
+    @JoinColumn(name = "niveau_suivant_id")
+    private Niveau niveauSuivant;
+
+    // Relation avec les étudiants (un niveau peut avoir plusieurs étudiants)
+    @OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Etudiant> etudiants;
+
+    // Relation avec les modules (un niveau peut avoir plusieurs modules)
+    @OneToMany(mappedBy = "niveau", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Module> modules;
+
+    // Relation avec les formules (un niveau peut avoir plusieurs formules)
+    @OneToMany
+    @JoinColumn(name="formule_id")
+    private List<Formule> formules;
+
+    // Relation avec le seuil (un niveau a un seuil)
+    @OneToOne
+    @JoinColumn(name="seuil_id")
+    private Seuil seuil;
+}

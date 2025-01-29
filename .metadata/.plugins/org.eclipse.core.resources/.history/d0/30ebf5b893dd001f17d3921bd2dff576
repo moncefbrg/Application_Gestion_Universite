@@ -1,0 +1,10 @@
+package com.example.demo.services.resultatelement;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+
+public interface IResultatElementService {
+	public boolean associerNoteElementEtudiant(Double note,Element element,Etudiant etudiant,String session)throws Exception;
+	public boolean modifierNoteElementEtudiant(Long resultatId, Double nouvelleNote, Element element, Etudiant etudiant,String session) throws Exception;
+
+}

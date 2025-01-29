@@ -1,9 +1,22 @@
 package com.example.demo;
 
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.INiveau;
 import com.example.demo.services.Etudiant.IEtudiantService;
+import com.example.demo.services.classe.IClasseService;
+import com.example.demo.services.element.IElementService;
 import com.example.demo.services.fichierexcel.IFichierExcelService;
+import com.example.demo.services.formule.IFormuleService;
+import com.example.demo.services.module.IModuleService;
+import com.example.demo.services.niveau.INiveauService;
+import com.example.demo.services.seuil.ISeuilService;
 
-
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,26 +33,39 @@ public class Application1Application {
     }
    
 	
-	  @Bean CommandLineRunner demo(IEtudiantService iEtudiantService,IFichierExcelService iFichierExcelService) {
+	  @Bean CommandLineRunner demo(IEtudiantService iEtudiantService,
+			  INiveauService iNiveauService,
+			  IModuleService iModuleService,
+			  IElementService iElementService,
+			  ISeuilService iSeuilService,
+			  IFormuleService iFormuleService,
+			  IFichierExcelService iFichierExcelService,
+			  INiveau iNiveau,
+			  IClasseService iClasseService
+			  ) {
 		  return args-> { 
-	  //File file = new File("C:\\Users\\MONCEF\\Desktop\\Notes_ClasseA_Session1.xlsx");
-	  
-				/*
-				 * String
-				 * path="C:\\\\Users\\\\MONCEF\\\\Desktop\\\\Fichier_Deliberation_3.xlsx";
-				 * System.out.println(iFichierExcelService.validateExcelStructure(path));
-				 */
-				
-				/*
-				 * List<String> modules=new
-				 * ArrayList<>(Arrays.asList("Analyse","Comptabilite","num","algorithme"));
-				 * List<String> enseignants=new
-				 * ArrayList<>(Arrays.asList("Ahmed","Adil","mounir","chahd")); List<String>
-				 * etudiants=new ArrayList<>(Arrays.asList("Ali","Hamid"));
-				 * iFichierExcelService.createExcelFile("C:\\Users\\MONCEF\\Desktop\\", "2024/
-				 * 2025", "25/01/2025", "G1", modules, enseignants, etudiants);
-				 */
+
+			  //Element element3=iElementService.creerElement((long)22, "Element 22");
+			  //Element element4=iElementService.creerElement((long)23, "Element 23");
 			  
-			  
+			  //List<Element> elements2=Arrays.asList(element3,element4);
+				/*
+				 * List<String> param =Arrays.asList("G5","H5"); Seuil
+				 * seuil=iSeuilService.creerSeuil((long)1,12, 10); Niveau
+				 * niveau=iNiveauService.creerNiveau((long)1, "genie logiciel", "GLCC", null,
+				 * seuil); iFormuleService.creerFormule((long)1, "Moyenne", "=AVG",
+				 * param,niveau); Module module=iModuleService.creerModule((long)17,
+				 * "Informatique", "S3",niveau,null); iElementService.creerElement((long)20,
+				 * "Element 20",module); iElementService.creerElement((long)21,
+				 * "Element 21",module); iClasseService.creerClasse("classeA");
+				 * iEtudiantService.ajouterEtudiant((long)12, "Ahmed", "nacir", "E122890",
+				 * "GLCC", null); iEtudiantService.creationFichierNoteExcel(String classe,String
+				 * session,String enseignant,String semestre,String module, path);
+				 */
+			  //File file=new File("C:\\Users\\MONCEF\\Desktop\\projet.xlsx");
+			  String path="C:\\Users\\MONCEF\\Desktop";
+			  String date="29/01/2025";
+			  //iEtudiantService.inscrire(file);
+			  iFichierExcelService.creationFichierDeliberation(path,date, "M11");
 	  }; }}
 	 

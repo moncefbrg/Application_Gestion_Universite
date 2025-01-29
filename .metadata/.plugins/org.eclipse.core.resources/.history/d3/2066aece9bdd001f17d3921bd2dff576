@@ -1,0 +1,13 @@
+package com.example.demo.repositories;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.entities.ResultatElement;
+
+@Repository
+public interface IResultatElement extends JpaRepository<ResultatElement, Long> {
+	List<ResultatElement> findBySession(String session);
+}

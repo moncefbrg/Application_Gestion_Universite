@@ -14,15 +14,26 @@ import com.example.demo.entities.Niveau;
 import com.example.demo.entities.Seuil;
 import com.example.demo.repositories.IModule;
 import com.example.demo.repositories.INiveau;
+import com.example.demo.repositories.ISeuil;
 @Service
 public class NiveauServiceImpl implements INiveauService{
 	@Autowired
 	private INiveau iNiveau;
 	@Autowired
+	private ISeuil iSeuil;
+	@Autowired
 	private IModule iModule;
+	@Override
+	public boolean checkExistanceNiveau(Long id) {
+		if(!(iNiveau.findById(id).isEmpty())) {
+			return true;
+		}else {
+			return false;
+		}		
+	}
 	@Transactional
 	@Override
-	public boolean creerNiveau(Long id, String nom, String alias, Niveau niveauSuivant, List<Module> modules, Seuil seuil, List<Formule> formules) throws Exception {
+	public Niveau creerNiveau(Long id, String nom, String alias, Niveau niveauSuivant, Seuil seuil) throws Exception {
 	    // Vérifier si un niveau avec le même ID existe déjà
 	    if (iNiveau.findById(id).isPresent()) {
 	        throw new RuntimeException("Un niveau avec l'ID " + id + " existe déjà.");
@@ -37,37 +48,33 @@ public class NiveauServiceImpl implements INiveauService{
 	    if (iNiveau.findByAlias(alias).isPresent()) {
 	        throw new RuntimeException("Un niveau avec l'alias " + alias + " existe déjà.");
 	    }
-
-	    // Vérifier si tous les modules existent
-	    List<String> modulesManquants = modules.stream()
-	            .map(Module::getNom)
-	            .filter(moduleNom -> iModule.findByNom(moduleNom).isEmpty())
-	            .collect(Collectors.toList());
-
-	    if (!modulesManquants.isEmpty()) {
-	        throw new RuntimeException("Les modules suivants n'existent pas : " + modulesManquants);
+	 // Vérifier si un niveau avec le même alias existe déjà
+	    if (iSeuil.findById(seuil.getId()).isEmpty()) {
+	        throw new RuntimeException("Un niveau avec le seuil " + seuil.getId() + " existe pas.");
 	    }
+	 
 
 	    // Vérifier si le niveau suivant existe
 	    if (niveauSuivant != null && iNiveau.findById(niveauSuivant.getId()).isEmpty()) {
 	        throw new RuntimeException("Le niveau suivant avec l'ID " + niveauSuivant.getId() + " n'existe pas.");
 	    }
-
 	    // Créer le niveau avec le Builder
 	    Niveau niveau = Niveau.builder()
 	            .id(id)
 	            .nom(nom)
 	            .alias(alias)
 	            .niveauSuivant(niveauSuivant)
-	            .modules(modules)
 	            .seuil(seuil)
-	            .formules(formules)
 	            .build();
 
 	    // Sauvegarder le niveau
 	    iNiveau.save(niveau);
-
-	    return true;
+		/*
+		 * for (Formule f : formules) { iFormuleService.creerFormule(f.getId(),
+		 * f.getNom(), f.getExpression(), f.getParametres()); Formule
+		 * f1=iFormule.findById(f.getId()).get(); iFormule.save(f1); }
+		 */
+	    return niveau;
 	}
 	@Override
 	@Transactional
@@ -173,5 +180,73 @@ public class NiveauServiceImpl implements INiveauService{
 	    iNiveau.delete(niveau);
 
 	    return true; // Retourne true si la suppression est réussie
+	}
+	@Override
+	@Transactional
+	public boolean associerSeuilNiveau(Niveau niveau, Seuil seuil) throws Exception {
+	    // Vérification des nullités
+	    if (niveau == null) {
+	        throw new RuntimeException("Le niveau ne peut pas être null.");
+	    }
+	    if (seuil == null) {
+	        throw new RuntimeException("Le seuil ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence du niveau dans la base de données
+	    Niveau niveauBD = iNiveau.findById(niveau.getId())
+	            .orElseThrow(() -> new RuntimeException("Le niveau avec l'ID " + niveau.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence du seuil dans la base de données
+	    Seuil seuilBD = iSeuil.findById(seuil.getId())
+	            .orElseThrow(() -> new RuntimeException("Le seuil avec l'ID " + seuil.getId() + " n'existe pas."));
+
+	    // Vérification que le seuil n'est pas déjà associé à un autre niveau
+	    if (seuilBD.getNiveau() != null) {
+	        throw new RuntimeException("Le seuil est déjà associé à un autre niveau.");
+	    }
+
+	    // Association du seuil au niveau
+	    niveauBD.setSeuil(seuilBD);
+	    seuilBD.setNiveau(niveauBD);
+
+	    // Sauvegarde des modifications
+	    iNiveau.save(niveauBD);
+	    iSeuil.save(seuilBD);
+
+	    return true;
+	}
+	@Override
+	@Transactional
+	public boolean separerSeuilNiveau(Niveau niveau, Seuil seuil) throws Exception {
+	    // Vérification des nullités
+	    if (niveau == null) {
+	        throw new RuntimeException("Le niveau ne peut pas être null.");
+	    }
+	    if (seuil == null) {
+	        throw new RuntimeException("Le seuil ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence du niveau dans la base de données
+	    Niveau niveauBD = iNiveau.findById(niveau.getId())
+	            .orElseThrow(() -> new RuntimeException("Le niveau avec l'ID " + niveau.getId() + " n'existe pas."));
+
+	    // Vérification de l'existence du seuil dans la base de données
+	    Seuil seuilBD = iSeuil.findById(seuil.getId())
+	            .orElseThrow(() -> new RuntimeException("Le seuil avec l'ID " + seuil.getId() + " n'existe pas."));
+
+	    // Vérification que le seuil est bien associé au niveau
+	    if (seuilBD.getNiveau() == null || !seuilBD.getNiveau().getId().equals(niveauBD.getId())) {
+	        throw new RuntimeException("Le seuil n'est pas associé à ce niveau.");
+	    }
+
+	    // Séparation du seuil et du niveau
+	    niveauBD.setSeuil(null);
+	    seuilBD.setNiveau(null);
+
+	    // Sauvegarde des modifications
+	    iNiveau.save(niveauBD);
+	    iSeuil.save(seuilBD);
+
+	    return true;
 	}
 }

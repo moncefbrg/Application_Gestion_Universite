@@ -1,0 +1,10 @@
+package com.example.demo.services.seuil;
+
+import com.example.demo.entities.Seuil;
+
+public interface ISeuilService {
+	public Seuil creerSueil(double xNormale,double yRattrapage);
+	public Seuil modifierSueil(Long id,Double nXNormale,Double nYRattrapage);
+	public boolean supprimerSueil(Long id);
+
+}

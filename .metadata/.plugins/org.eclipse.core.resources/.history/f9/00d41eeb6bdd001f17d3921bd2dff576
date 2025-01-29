@@ -1,0 +1,9 @@
+package com.example.demo.services.resultatelement;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+
+public interface IResultatElementService {
+	public boolean associerNoteElementEtudiant(double note,Element element,Etudiant etudiant)throws Exception;
+
+}

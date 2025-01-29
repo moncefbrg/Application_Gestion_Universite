@@ -1,0 +1,37 @@
+package com.example.demo.services.resultatelement;
+
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.entities.Niveau;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IEtudiant;
+
+public class ResultatElementServiceImpl implements IResultatElementService {
+	@Autowired
+	private IElement iElement;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Override @Transactional
+	public boolean associerNoteElementEtudiant(Double note, Element element, Etudiant etudiant) throws Exception {
+		Optional<Element> elementBD=iElement.findById(element.getId());
+		Optional<Etudiant> etudiantBD=iEtudiant.findById(element.getId());
+		Niveau niveauEtudiant=iEtudiant.findById(etudiant.getId()).get().getNiveau();
+		Niveau niveauModule=iElement.findById(element.getId()).get().getModule().getNiveau();
+
+		if(note==null) {}
+		if(element==null) {}
+		if(etudiant==null) {}
+		if(note<0 ||note>20) {}
+		if(elementBD.isEmpty()) {}
+		if(etudiantBD.isEmpty()) {}
+		if(etudiantBD.get().getNiveau()==elementBD.get().getModule())
+		return false;
+	}
+
+}

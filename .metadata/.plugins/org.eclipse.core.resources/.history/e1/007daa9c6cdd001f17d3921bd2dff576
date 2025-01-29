@@ -1,0 +1,22 @@
+package com.example.demo.services.resultatelement;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IEtudiant;
+
+public class ResultatElementServiceImpl implements IResultatElementService {
+	@Autowired
+	private IElement iElement;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Override @Transactional
+	public boolean associerNoteElementEtudiant(Double note, Element element, Etudiant etudiant) throws Exception {
+		if(note==null) {}
+		return false;
+	}
+
+}

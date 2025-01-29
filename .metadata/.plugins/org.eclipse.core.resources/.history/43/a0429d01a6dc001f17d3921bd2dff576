@@ -1,0 +1,60 @@
+package com.example.demo;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Seuil;
+import com.example.demo.services.Etudiant.IEtudiantService;
+import com.example.demo.services.element.IElementService;
+import com.example.demo.services.fichierexcel.IFichierExcelService;
+import com.example.demo.services.module.IModuleService;
+import com.example.demo.services.niveau.INiveauService;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+
+
+@SpringBootApplication
+public class Application1Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application1Application.class, args);
+    }
+   
+	
+	  @Bean CommandLineRunner demo(IEtudiantService iEtudiantService,INiveauService iNiveauService,IModuleService iModuleService,IElementService iElementService) {
+		  return args-> { 
+			  Element element1=iElementService.creerElement((long)20, "Element 11");
+			  Element element2=iElementService.creerElement((long)21, "Element 12");
+			  Element element3=iElementService.creerElement((long)22, "Element 13");
+			  Element element4=iElementService.creerElement((long)23, "Element 14");
+
+			  Seuil seuil=Seuil.builder()
+			  .id((long)1)
+			  .XNormale(12)
+			  .YRattrapage(10)
+			  .build();
+			  
+			  List<Element> elements=Arrays.asList(element1,element2);
+			  List<Element> elements2=Arrays.asList(element3,element4);
+			  Module module1=iModuleService.creerModule((long)1, "Informatique", "S3", elements);
+			  Module module2=iModuleService.creerModule((long)2, "Algorithme", "S3", elements2);
+			  List<Module> modules=Arrays.asList(module1,module2);
+			  Formule f1=Formule.builder()
+					  .id((long)1)
+					  .nom("moyenne")
+					  .expression("=Moyenne")
+					  .build();
+			  List<Formule> formules = Arrays.asList(f1);
+
+			  iNiveauService.creerNiveau((long)30, "genie logiciel", "GCC", null, modules, seuil, formules);
+			  iEtudiantService.ajouterEtudiant((long)15, "amer", "Ahmed", "E1552897", null, null);
+			  
+	  }; }}
+	 

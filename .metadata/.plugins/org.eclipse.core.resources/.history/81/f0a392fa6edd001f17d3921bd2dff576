@@ -1,0 +1,68 @@
+package com.example.demo.services.resultatelement;
+
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.ResultatElement;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IEtudiant;
+import com.example.demo.repositories.IResultatElement;
+
+public class ResultatElementServiceImpl implements IResultatElementService {
+	@Autowired
+	private IElement iElement;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Autowired
+	private IResultatElement iResultatElement;
+	@Override
+	@Transactional
+	public boolean associerNoteElementEtudiant(Double note, Element element, Etudiant etudiant) throws Exception {
+	    // Vérification des nullités
+	    if (note == null) {
+	        throw new RuntimeException("Vous devez entrer la note.");
+	    }
+	    if (element == null) {
+	        throw new RuntimeException("Vous devez entrer l'élément.");
+	    }
+	    if (etudiant == null) {
+	        throw new RuntimeException("Vous devez entrer l'étudiant.");
+	    }
+
+	    // Vérification de la validité de la note
+	    if (note < 0 || note > 20) {
+	        throw new RuntimeException("La note doit être comprise entre 0 et 20.");
+	    }
+
+	    // Vérification de l'existence de l'élément et de l'étudiant dans la base de données
+	    Element elementBD = iElement.findById(element.getId())
+	            .orElseThrow(() -> new RuntimeException("L'élément avec l'ID " + element.getId() + " n'existe pas."));
+	    Etudiant etudiantBD = iEtudiant.findById(etudiant.getId())
+	            .orElseThrow(() -> new RuntimeException("L'étudiant avec l'ID " + etudiant.getId() + " n'existe pas."));
+
+	    // Récupération des niveaux
+	    Niveau niveauEtudiant = etudiantBD.getNiveau();
+	    Niveau niveauModule = elementBD.getModule().getNiveau();
+
+	    // Vérification de la cohérence des niveaux
+	    if (!niveauEtudiant.equals(niveauModule) && !niveauEtudiant.getNiveauSuivant().equals(niveauModule)) {
+	        throw new RuntimeException("Incohérence de niveau : l'étudiant et le module ne sont pas du même niveau.");
+	    }
+
+	    // Création et enregistrement du résultat
+	    ResultatElement r = new ResultatElement();
+	    r.setNote(note);
+	    r.setElement(element);
+	    r.setEtudiant(etudiant);
+	    iResultatElement.save(r);
+
+	    return true;
+	}
+
+}

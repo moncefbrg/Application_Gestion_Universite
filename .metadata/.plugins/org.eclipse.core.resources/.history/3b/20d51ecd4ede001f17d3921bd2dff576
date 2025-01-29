@@ -1,0 +1,36 @@
+package com.example.demo.entities;
+
+import java.util.List;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
+import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+@Entity
+@Data @NoArgsConstructor @AllArgsConstructor @ToString @Builder
+public class Element {
+	@Id
+	private Long id;
+	private String nom;
+	
+	@ManyToOne
+	@JoinColumn(name="module_id")
+	private Module module;
+	
+	@OneToMany(mappedBy="element")
+	private List<ResultatElement> ResultatsElements;
+	@Override
+    public String toString() {
+        return "Element{" +
+                "id=" + id +
+                ", nom='" + nom  +
+                                '}';
+    }
+		
+}

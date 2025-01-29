@@ -11,6 +11,7 @@ import com.example.demo.entities.Classe;
 import com.example.demo.entities.Etudiant;
 import com.example.demo.repositories.IClasse;
 import com.example.demo.repositories.IEtudiant;
+import com.example.demo.services.fichierexcel.IFichierExcelService;
 import com.example.demo.entities.ResultatElement;
 import com.example.demo.entities.Module;
 
@@ -23,11 +24,12 @@ public class ServiceCollecteNotesImpl implements IServiceCollecteNotes {
 	private IEtudiant etudiantRepository;
 	@Autowired
 	private IClasse classeRepository;
-
+	@Autowired
+	private IFichierExcelService iFichierExcelService;
 	@Override
-	public File genererFichierCollecteNotes(String session, String niveau, String module) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public File genererFichierCollecteNotes(String session, String classe, String module,String path) throws Exception {
+		File file=iFichierExcelService.creationFichierNoteExcel(classe, session, module, path);
+		return file;
 	}
 
 	@Override

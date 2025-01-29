@@ -1,0 +1,18 @@
+package com.example.demo.services.moduleetudiant;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.repositories.IEtudiant;
+import com.example.demo.repositories.IModule;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Etudiant;
+
+@Service
+public class ModuleEtudiantServiceImpl implements IModuleEtudiantService{
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Autowired
+	private IModule iModule;
+	
+}

@@ -28,3 +28,36 @@ INSERT INTO `niveau` (`id`, `alias`, `nom`) VALUES
 (27, 'ID2', 'Ingénierie des données 2'),
 (28, 'ID3', 'Ingénierie des données 3'),
 (29, 'GI3 MI', 'Génie Informatique 3 Option Médias et Interactions');
+UPDATE niveau
+SET niveau_suivant_id = CASE
+    WHEN id = 1 THEN 2
+    WHEN id = 2 THEN 12
+    WHEN id = 3 THEN 4
+    WHEN id = 4 THEN 5
+    WHEN id = 5 THEN NULL
+    WHEN id = 6 THEN 7
+    WHEN id = 7 THEN 8
+    WHEN id = 8 THEN NULL
+    WHEN id = 9 THEN NULL
+    WHEN id = 10 THEN NULL
+    WHEN id = 11 THEN NULL
+    WHEN id = 12 THEN NULL
+    WHEN id = 13 THEN 14
+    WHEN id = 14 THEN 15
+    WHEN id = 15 THEN NULL
+    WHEN id = 16 THEN 21
+    WHEN id = 17 THEN NULL
+    WHEN id = 18 THEN NULL
+    WHEN id = 19 THEN NULL
+    WHEN id = 20 THEN NULL
+    WHEN id = 21 THEN 22
+    WHEN id = 22 THEN NULL
+    WHEN id = 23 THEN 24
+    WHEN id = 24 THEN 25
+    WHEN id = 25 THEN NULL
+    WHEN id = 26 THEN 27
+    WHEN id = 27 THEN 28
+    WHEN id = 28 THEN NULL
+    WHEN id = 29 THEN 25
+END
+WHERE id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29);

@@ -1,0 +1,48 @@
+package com.example.demo.services.resultatelement;
+
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Etudiant;
+import com.example.demo.entities.Niveau;
+import com.example.demo.entities.ResultatElement;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IEtudiant;
+import com.example.demo.repositories.IResultatElement;
+
+public class ResultatElementServiceImpl implements IResultatElementService {
+	@Autowired
+	private IElement iElement;
+	@Autowired
+	private IEtudiant iEtudiant;
+	@Autowired
+	private IResultatElement iResultatElement;
+	@Override @Transactional
+	public boolean associerNoteElementEtudiant(Double note, Element element, Etudiant etudiant) throws Exception {
+		Optional<Element> elementBD=iElement.findById(element.getId());
+		Optional<Etudiant> etudiantBD=iEtudiant.findById(element.getId());
+		Niveau niveauEtudiant=iEtudiant.findById(etudiant.getId()).get().getNiveau();
+		Niveau niveauModule=iElement.findById(element.getId()).get().getModule().getNiveau();
+
+		if(note==null) {throw new RuntimeException("Vous devez entrez la note .");}
+		if(element==null) {throw new RuntimeException("Vous devez entrez l'element .");}
+		if(etudiant==null) {throw new RuntimeException("Vous devez entrez l'etudiant .");}
+		if(note<0 ||note>20) {throw new RuntimeException("La note est incorrecte.");}
+		if(elementBD.isEmpty()) {throw new RuntimeException("L'element avec l'ID " + element.getId() + " n'existe pas.");}
+		if(etudiantBD.isEmpty()) {throw new RuntimeException("L'etudiant avec l'ID " + etudiant.getId() + " n'existe pas.");}
+		if(!(niveauEtudiant==niveauModule) || !(niveauEtudiant.getNiveauSuivant()==niveauModule)) {
+			throw new RuntimeException("Incoherance de niveau.");
+		}
+		ResultatElement r=new ResultatElement();
+		r.setNote(note);
+		r.setElement(element);
+		r.setEtudiant(etudiant);
+		iResultatElement.save(r);
+		return true;
+	}
+
+}

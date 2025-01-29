@@ -1,0 +1,58 @@
+package com.example.demo;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Module;
+import com.example.demo.entities.Seuil;
+import com.example.demo.services.Etudiant.IEtudiantService;
+import com.example.demo.services.element.IElementService;
+import com.example.demo.services.fichierexcel.IFichierExcelService;
+import com.example.demo.services.formule.IFormuleService;
+import com.example.demo.services.module.IModuleService;
+import com.example.demo.services.niveau.INiveauService;
+import com.example.demo.services.seuil.ISeuilService;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+
+
+@SpringBootApplication
+public class Application1Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application1Application.class, args);
+    }
+   
+	
+	  @Bean CommandLineRunner demo(IEtudiantService iEtudiantService,INiveauService iNiveauService,IModuleService iModuleService,IElementService iElementService,ISeuilService iSeuilService,IFormuleService iFormuleService) {
+		  return args-> { 
+			  Element element1=iElementService.creerElement((long)20, "Element 20");
+			  Element element2=iElementService.creerElement((long)21, "Element 21");
+			  Element element3=iElementService.creerElement((long)22, "Element 22");
+			  Element element4=iElementService.creerElement((long)23, "Element 23");
+			  
+			  List<Element> elements=Arrays.asList(element1,element2);
+			  List<Element> elements2=Arrays.asList(element3,element4);
+			  Module module1=iModuleService.creerModule((long)17, "Informatique", "S3", elements);
+			  Module module2=iModuleService.creerModule((long)18, "Algorithme", "S3", elements2);
+			  List<Module> modules=Arrays.asList(module1,module2);
+			  List<String> param =Arrays.asList("G5","H5");
+			  Formule f1=iFormuleService.creerFormule((long)1, "Moyenne", "=AVG", param);
+			  Seuil seuil=iSeuilService.creerSeuil(12, 10);
+			  List<Formule> formules = Arrays.asList(f1);
+			  if (seuil.getId() != null) {
+	                System.out.println("Seuil créé avec ID : " + seuil.getId());
+
+	                // Création du niveau
+	                iNiveauService.creerNiveau((long)1,"genie logiciel", "GCC",null, modules, seuil, formules);
+	            }
+			 iEtudiantService.ajouterEtudiant((long)15, "amer", "Ahmed", "E1552897", null, null);
+			  
+	  }; }}
+	 

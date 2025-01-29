@@ -8,19 +8,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entities.Element;
+import com.example.demo.entities.Enseignant;
 import com.example.demo.entities.Module;
+import com.example.demo.entities.Niveau;
 import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IEnseignant;
 import com.example.demo.repositories.IModule;
+import com.example.demo.repositories.INiveau;
 
 @Service
 public class ModuleServiceImpl implements IModuleService{
 	@Autowired
-	IModule iModule;
+	private IModule iModule;
 	@Autowired
-	IElement iElement;
+	private INiveau iNiveau;
+	@Autowired
+	private IElement iElement;
+	@Autowired
+	private IEnseignant iEnseignant;
 	@Override
 	@Transactional
-	public boolean creerModule(Long id, String nom, String semestre, List<Element> elements) {
+	public Module creerModule(Long id, String nom, String semestre,Niveau niveau,Enseignant enseignant) {
 	    // Vérifier que les entrées ne sont pas null ou invalides
 	    if (id == null) {
 	        throw new IllegalArgumentException("L'ID du module ne peut pas être null.");
@@ -31,9 +39,7 @@ public class ModuleServiceImpl implements IModuleService{
 	    if (semestre == null || semestre.trim().isEmpty()) {
 	        throw new IllegalArgumentException("Le semestre ne peut pas être null ou vide.");
 	    }
-	    if (elements == null || elements.isEmpty()) {
-	        throw new IllegalArgumentException("La liste des éléments ne peut pas être null ou vide.");
-	    }
+	    
 
 	    // Vérifier si un module avec le même ID existe déjà
 	    if (iModule.findById(id).isPresent()) {
@@ -44,6 +50,14 @@ public class ModuleServiceImpl implements IModuleService{
 	    if (iModule.findByNom(nom).isPresent()) {
 	        throw new RuntimeException("Un module avec le nom " + nom + " existe déjà.");
 	    }
+	 // Vérifier si un module avec le même nom existe déjà
+	    if (iNiveau.findById(niveau.getId()).isEmpty()) {
+	        throw new RuntimeException("Le niveau avec le nom " + niveau.getNom() + " existe pas.");
+	    }
+	 // Vérifier si un module avec le même nom existe déjà
+	    if (!(enseignant==null) && iEnseignant.findById(enseignant.getId()).isEmpty()) {
+	        throw new RuntimeException("L'enseignant avec le nom " + enseignant.getNom() + " existe pas.");
+	    }
 
 
 	    // Créer le module
@@ -51,13 +65,14 @@ public class ModuleServiceImpl implements IModuleService{
 	            .id(id)
 	            .nom(nom)
 	            .semestre(semestre)
-	            .elements(elements)
+	            .enseignant(enseignant==null?null:enseignant)
+	            .niveau(niveau)
 	            .build();
 
 	    // Sauvegarder le module
 	    iModule.save(module);
 
-	    return true; // Retourne true si la création est réussie
+	    return module; // Retourne true si la création est réussie
 	}
 
 	@Override
@@ -129,5 +144,34 @@ public class ModuleServiceImpl implements IModuleService{
 	    iModule.delete(module);
 
 	    return true; // Retourne true si la suppression est réussie
+	}
+
+	@Override
+	@Transactional
+	public void associerModuleEnseignant(Module module, Enseignant enseignant) throws Exception{
+	    // Vérification des nullités
+	    if (module == null) {
+	        throw new RuntimeException("Le module ne peut pas être null.");
+	    }
+	    if (enseignant == null) {
+	        throw new RuntimeException("L'enseignant ne peut pas être null.");
+	    }
+
+	    // Vérification de l'existence de l'enseignant dans la base de données
+	    if (iEnseignant.findById(enseignant.getId()).isEmpty()) {
+	        throw new RuntimeException("L'enseignant avec l'ID " + enseignant.getId() + " n'existe pas.");
+	    }
+
+	    // Vérification de l'existence du module dans la base de données
+	    if (iModule.findById(module.getId()).isEmpty()) {
+	        throw new RuntimeException("Le module avec l'ID " + module.getId() + " n'existe pas.");
+	    }
+	    if (!(iModule.findById(module.getId()).get().getEnseignant()==null)) {
+	        throw new RuntimeException("Le module avec l'ID " + module.getId() + " est deja associer a un autre enseignant.");
+	    }
+
+	    // Association de l'enseignant au module
+	    module.setEnseignant(enseignant);
+	    iModule.save(module);
 	}
 }

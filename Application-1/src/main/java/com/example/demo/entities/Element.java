@@ -10,9 +10,10 @@ import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.ToString;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 @Entity
-@Data @NoArgsConstructor @AllArgsConstructor @ToString
+@Data @NoArgsConstructor @AllArgsConstructor  @Builder
 public class Element {
 	@Id
 	private Long id;
@@ -24,5 +25,12 @@ public class Element {
 	
 	@OneToMany(mappedBy="element")
 	private List<ResultatElement> ResultatsElements;
+	@Override
+    public String toString() {
+        return "Element{" +
+                "id=" + id +
+                ", nom='" + nom  +
+                                '}';
+    }
 		
 }

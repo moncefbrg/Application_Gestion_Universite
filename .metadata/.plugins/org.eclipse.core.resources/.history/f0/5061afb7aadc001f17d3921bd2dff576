@@ -1,0 +1,54 @@
+package com.example.demo.services.formule;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Formule;
+import com.example.demo.entities.Seuil;
+import com.example.demo.repositories.IFormule;
+
+public class FormuleServiceimpl implements IFormuleService{
+	@Autowired
+	private IFormule iFormule;
+	@Override @Transactional
+	public Formule creerFormule(Long id, String nom, String expression, List<String> param) {
+		// Vérifier si un seuil avec le même ID existe déjà
+        if (iFormule.existsById(id)) {
+            throw new RuntimeException("Une formule avec l'ID " + id + " existe déjà.");
+        }
+
+        // Créer un nouveau seuil en utilisant le Builder (si disponible)
+        Formule formule = Formule.builder()
+                .id(id)
+                .expression(expression)
+                .nom(nom)
+                .parametres(param)
+                .build();
+
+        // Sauvegarder le seuil dans la base de données
+        return iFormule.save(formule);
+    }
+	
+
+	@Override
+	public Formule modifierFormule(Long id, String nouveauNom, String nouvelleExpression, List<String> nParam) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override @Transactional
+	public boolean supprimerFormule(Long id) {
+		// Vérifier si la Formule existe
+        if (iFormule.existsById(id)) {
+            // Supprimer la Formule
+        	iFormule.deleteById(id);
+            return true;
+        } else {
+            // Retourner false si la formule n'existe pas
+            return false;
+        }
+    }
+
+}
