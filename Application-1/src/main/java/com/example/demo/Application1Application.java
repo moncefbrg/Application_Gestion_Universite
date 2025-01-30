@@ -26,7 +26,16 @@ import org.springframework.context.annotation.Bean;
 
 
 @SpringBootApplication
-public class Application1Application {
+public class Application1Application implements CommandLineRunner {
+
+	@Autowired
+	private IUtilisateur iutilisateur;
+	
+	@Autowired
+	private UtilisateurService utilisateurService;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
     public static void main(String[] args) {
         SpringApplication.run(Application1Application.class, args);
@@ -67,5 +76,30 @@ public class Application1Application {
 			  String date="29/01/2025";
 			  //iEtudiantService.inscrire(file);
 			  iFichierExcelService.creationFichierDeliberation(path,date, "M11");
-	  }; }}
+	  }; }
+
+	@Override
+    public void run(String... args) throws Exception {
+    	//verifier si un compte ADMIN_USER existe déjà
+    	if(!iutilisateur.existsByUsername("admin")) {
+    		//creer un compte ADMIN_USER
+    		Set<String> roles= new HashSet<>();
+    		roles.add("ADMIN_USER");
+    		
+    		utilisateurService.inscrireUtilisateur(
+    				"admin",
+    				"admin123",
+    				 roles
+    		);
+    		
+    		System.out.println("Compte ADMIN_USER créé avec succès !");
+    		
+    	} else {
+    		System.out.println("Un compte ADMIN_USER existe déjà.");
+    	}
+    }
+	  
+	  
+	  
+}
 	 
