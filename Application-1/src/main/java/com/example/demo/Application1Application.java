@@ -78,10 +78,10 @@ public class Application1Application implements CommandLineRunner {
 				 * session,String enseignant,String semestre,String module, path);
 				 */
 			  //File file=new File("C:\\Users\\MONCEF\\Desktop\\projet.xlsx");
-			  String path="C:\\Users\\MONCEF\\Desktop";
-			  String date="29/01/2025";
+			  //String path="C:\\Users\\MONCEF\\Desktop";
+			  //String date="29/01/2025";
 			  //iEtudiantService.inscrire(file);
-			  iFichierExcelService.creationFichierDeliberation(path,date, "M11");
+			 // iFichierExcelService.creationFichierDeliberation(path,date, "M11");
 	  }; }
 
 	@Override
@@ -93,6 +93,7 @@ public class Application1Application implements CommandLineRunner {
     		roles.add("ADMIN_USER");
     		
     		utilisateurService.inscrireUtilisateur(
+    				(long)1,
     				"admin",
     				"admin123",
     				 roles

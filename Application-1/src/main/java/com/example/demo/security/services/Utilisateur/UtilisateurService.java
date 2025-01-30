@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +26,7 @@ public class UtilisateurService implements UserDetailsService {
 	private IUtilisateur iutilisateur;
 	
 	@Autowired
+	@Lazy
 	private PasswordEncoder passwordEncoder; //pour encoder le mdp avant de l'enregistrer dans la bd
 
 
@@ -45,7 +47,7 @@ public class UtilisateurService implements UserDetailsService {
 	}
 	
 	@Transactional
-	public Utilisateur inscrireUtilisateur(String username, String password, Set<String> roles) {
+	public Utilisateur inscrireUtilisateur(Long id,String username, String password, Set<String> roles) {
 		//on verifie si l'utilisateur existe deja
 		if(iutilisateur.findByUsername(username).isPresent()) {
 			throw new RuntimeException("Ce nom d'utilisateur est déjà pris !");
@@ -56,6 +58,7 @@ public class UtilisateurService implements UserDetailsService {
 		
 		//creer un nouvel user avec role specifié
 		Utilisateur utilisateur=new Utilisateur();
+		utilisateur.setId(id);
 		utilisateur.setUsername(username);
 		utilisateur.setPassword(encodedPassword);
 		utilisateur.setRoles(new HashSet<>(roles));
