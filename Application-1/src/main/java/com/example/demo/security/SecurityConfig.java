@@ -17,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.example.demo.services.Utilisateur.UtilisateurService;
+import com.example.demo.security.services.Utilisateur.UtilisateurService;
+
+
 
 @Configuration
 @EnableWebSecurity

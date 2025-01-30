@@ -4,6 +4,8 @@ import com.example.demo.entities.Module;
 import com.example.demo.entities.Niveau;
 import com.example.demo.entities.Seuil;
 import com.example.demo.repositories.INiveau;
+import com.example.demo.security.repositories.IUtilisateur;
+import com.example.demo.security.services.Utilisateur.UtilisateurService;
 import com.example.demo.services.Etudiant.IEtudiantService;
 import com.example.demo.services.classe.IClasseService;
 import com.example.demo.services.element.IElementService;
@@ -16,12 +18,16 @@ import com.example.demo.services.seuil.ISeuilService;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 

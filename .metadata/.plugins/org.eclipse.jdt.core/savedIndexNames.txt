@@ -87,7 +87,6 @@ INDEX VERSION 1.134+C:\Users\MONCEF\Desktop\projet jee\.metadata\.plugins\org.ec
 4096701704.index
 2274195510.index
 733134462.index
-2061601303.index
 2214471914.index
 340927609.index
 4262252391.index

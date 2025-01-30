@@ -1,4 +1,4 @@
-package com.example.demo.services.Utilisateur;
+package com.example.demo.security.services.Utilisateur;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,11 +13,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.repositories.IUtilisateur;
+import com.example.demo.security.repositories.IUtilisateur;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.entities.Utilisateur;
+import com.example.demo.security.entities.Utilisateur;
 
 @Service
 public class UtilisateurService implements UserDetailsService {
