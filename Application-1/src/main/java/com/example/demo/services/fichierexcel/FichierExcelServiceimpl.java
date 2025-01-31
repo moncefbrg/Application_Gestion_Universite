@@ -11,7 +11,6 @@ import com.example.demo.entities.Module;
 import com.example.demo.entities.ResultatElement;
 import com.example.demo.entities.Classe;
 import com.example.demo.entities.Element;
-import com.example.demo.entities.Enseignant;
 import com.example.demo.entities.Etudiant;
 import com.example.demo.entities.Formule;
 import com.example.demo.repositories.IClasse;

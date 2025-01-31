@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Étudiants</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Portail Université</a>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link active" href="/etudiants">Étudiants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enseignants">Enseignants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
+                <li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Liste des étudiants</h1>
+        <!-- Bouton pour ajouter un étudiant -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#ajouterEtudiantModal">
+            <i class="fas fa-plus"></i> Ajouter un étudiant
+        </button>
+        <!-- Tableau des étudiants -->
+        <table id="table-etudiants" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>CNE</th>
+                    <th>Niveau</th>
+                    <th>Classe</th>
+                    <th>Actions</th> <!-- Nouvelle colonne pour les boutons d'action -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="etudiant : ${etudiants}">
+                    <td th:text="${etudiant.id}"></td>
+                    <td th:text="${etudiant.nom}"></td>
+                    <td th:text="${etudiant.prenom}"></td>
+                    <td th:text="${etudiant.cne}"></td>
+                    <td th:text="${etudiant.niveau.nom}"></td>
+                    <td th:text="${etudiant.classe.nom}"></td>
+                    <td>
+                        <!-- Boutons d'action -->
+                        <a th:href="@{/etudiants/{id}/edit(id=${etudiant.id})}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a th:href="@{/etudiants/{id}/delete(id=${etudiant.id})}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal pour ajouter un étudiant -->
+    <div class="modal fade" id="ajouterEtudiantModal" tabindex="-1" aria-labelledby="ajouterEtudiantModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterEtudiantModalLabel">Ajouter un étudiant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/etudiants}" method="post">
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prenom" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cne" class="form-label">CNE</label>
+                            <input type="text" class="form-control" id="cne" name="cne" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="niveau" class="form-label">Niveau</label>
+                            <select class="form-control" id="niveau" name="niveau" required>
+                                <option th:each="niveau : ${niveaux}" th:value="${niveau.id}" th:text="${niveau.nom}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="classe" class="form-label">Classe</label>
+                            <select class="form-control" id="classe" name="classe" required>
+                                <option th:each="classe : ${classes}" th:value="${classe.id}" th:text="${classe.nom}"></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialisation de DataTables
+            $('#table-etudiants').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' // Traduction en français
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

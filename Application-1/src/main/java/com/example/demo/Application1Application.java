@@ -1,8 +1,5 @@
 package com.example.demo;
 
-import com.example.demo.entities.Module;
-import com.example.demo.entities.Niveau;
-import com.example.demo.entities.Seuil;
 import com.example.demo.repositories.INiveau;
 import com.example.demo.security.repositories.IUtilisateur;
 import com.example.demo.security.services.Utilisateur.UtilisateurService;
@@ -19,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,14 +85,13 @@ public class Application1Application implements CommandLineRunner {
     	//verifier si un compte ADMIN_USER existe déjà
     	if(!iutilisateur.existsByUsername("admin")) {
     		//creer un compte ADMIN_USER
-    		Set<String> roles= new HashSet<>();
-    		roles.add("ADMIN_USER");
+    		String role = "ADMIN_USER";
     		
-    		utilisateurService.inscrireUtilisateur(
+    		utilisateurService.creerUtilisateur(
     				(long)1,
     				"admin",
     				"admin123",
-    				 roles
+    				 role
     		);
     		
     		System.out.println("Compte ADMIN_USER créé avec succès !");

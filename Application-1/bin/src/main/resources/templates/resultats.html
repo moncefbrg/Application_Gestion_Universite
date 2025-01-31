@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Résultats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Portail Université</a>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enseignants">Enseignants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/resultats">Résultats</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Liste des résultats</h1>
+        <div class="d-flex justify-content-between mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterResultatModal">
+                <i class="fas fa-plus"></i> Ajouter un résultat
+            </button>
+            <div>
+                <label for="search">Rechercher :</label>
+                <input type="text" id="search" class="form-control d-inline-block w-auto">
+            </div>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom de l'étudiant</th>
+                    <th>Élément</th>
+                    <th>Note</th>
+                    <th>Session</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="resultat : ${resultats}">
+                    <td th:text="${resultat.id}"></td>
+                    <td th:text="${resultat.etudiant.nom} + ' ' + ${resultat.etudiant.prenom}"></td>
+                    <td th:text="${resultat.element.nom}"></td>
+                    <td th:text="${resultat.note}"></td>
+                    <td th:text="${resultat.session}"></td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modifierResultatModal">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>Afficher 10 entrées</div>
+            <div>
+                <span>Affichage de 1 à 1 sur 1 entrées</span>
+                <button class="btn btn-sm btn-outline-secondary">Précédente</button>
+                <button class="btn btn-sm btn-outline-secondary active">1</button>
+                <button class="btn btn-sm btn-outline-secondary">Suivante</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter un résultat -->
+    <div class="modal fade" id="ajouterResultatModal" tabindex="-1" aria-labelledby="ajouterResultatModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterResultatModalLabel">Ajouter un résultat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="etudiant" class="form-label">Étudiant</label>
+                            <select class="form-select" id="etudiant" required>
+                                <!-- Options pour les étudiants -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="element" class="form-label">Élément</label>
+                            <select class="form-select" id="element" required>
+                                <!-- Options pour les éléments -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="note" class="form-label">Note</label>
+                            <input type="number" class="form-control" id="note" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="session" class="form-label">Session</label>
+                            <input type="text" class="form-control" id="session" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour modifier un résultat -->
+    <div class="modal fade" id="modifierResultatModal" tabindex="-1" aria-labelledby="modifierResultatModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modifierResultatModalLabel">Modifier un résultat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="modifierEtudiant" class="form-label">Étudiant</label>
+                            <select class="form-select" id="modifierEtudiant" required>
+                                <!-- Options pour les étudiants -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modifierElement" class="form-label">Élément</label>
+                            <select class="form-select" id="modifierElement" required>
+                                <!-- Options pour les éléments -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modifierNote" class="form-label">Note</label>
+                            <input type="number" class="form-control" id="modifierNote" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modifierSession" class="form-label">Session</label>
+                            <input type="text" class="form-control" id="modifierSession" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
