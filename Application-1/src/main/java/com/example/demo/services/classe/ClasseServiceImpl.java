@@ -1,5 +1,6 @@
 package com.example.demo.services.classe;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -245,6 +246,40 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    return true;
 	}
+	
+	public List<Etudiant> getTousLesEtudiants() {
+	    List<Classe> classes = iClasse.findAll(); // Récupérer toutes les classes
+	    List<Etudiant> listEtudiants = new ArrayList<>();
+
+	    for (Classe classe : classes) {
+	        listEtudiants.addAll(classe.getEtudiants()); // Ajouter les étudiants de chaque classe
+	    }
+
+	    return listEtudiants;
+	}
+
+	@Override
+	public List<Classe> getAllClasses() {
+		return iClasse.findAll();
+	}
+
+	@Override
+	public Classe getClasseById(Long id) {
+		return iClasse.findById(id)
+				.orElseThrow(() -> new RuntimeException("Classe non trouvée avec l'ID : " + id));
+	}
+
+	@Override
+	public Classe getClasseByNom(String nom) {
+		return iClasse.findByNom(nom)
+				.orElseThrow(() -> new RuntimeException("Classe non trouvée"));
+	}
+
+	@Override
+	public void save(Classe classe) {
+		iClasse.save(classe);
+	}
+
 
 	
 }

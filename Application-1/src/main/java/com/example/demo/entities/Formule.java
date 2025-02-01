@@ -25,7 +25,10 @@ public class Formule {
     @Id
     private Long id;
     
+    @Column(nullable=false)
     private String nom;
+    
+    @Column(nullable=false)
     private String expression;
 
     @ElementCollection

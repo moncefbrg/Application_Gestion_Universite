@@ -8,5 +8,6 @@ import com.example.demo.security.entities.Role;
 
 public interface IRole extends JpaRepository<Role, Long>{
 	Optional<Role> findByNom(String nom);
+	public boolean existsByNom(String nom);
 
 }

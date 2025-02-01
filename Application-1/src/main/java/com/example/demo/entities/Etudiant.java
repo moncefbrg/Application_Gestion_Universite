@@ -21,13 +21,13 @@ import lombok.NoArgsConstructor;
 public class Etudiant {
 	@Id
 	private Long id;
-	@Column(unique=true)
+	@Column(unique=true, nullable=false)
     private String cne;
     private String nom;
     private String prenom;
     @ManyToOne
     @JsonBackReference  // Ignorer la sérialisation de la relation Niveau -> Etudiant
-
+    @JoinColumn(name="niveau_id", nullable=false)
     private Niveau niveau;
     
     @ManyToMany(fetch = FetchType.EAGER)
@@ -40,7 +40,7 @@ public class Etudiant {
     private List<Module> modules;
     
     @ManyToOne
-    @JoinColumn(name = "classe_id") // Clé étrangère vers Classe
+    @JoinColumn(name = "classe_id", nullable=false) // Clé étrangère vers Classe
     private Classe classe;
     
 }

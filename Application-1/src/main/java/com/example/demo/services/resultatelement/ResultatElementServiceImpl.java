@@ -2,7 +2,10 @@ package com.example.demo.services.resultatelement;
 
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entities.Element;
@@ -13,6 +16,7 @@ import com.example.demo.repositories.IElement;
 import com.example.demo.repositories.IEtudiant;
 import com.example.demo.repositories.IResultatElement;
 
+@Service("ResultatElementServiceImpl")
 public class ResultatElementServiceImpl implements IResultatElementService {
 	@Autowired
 	private IElement iElement;
@@ -120,6 +124,12 @@ public class ResultatElementServiceImpl implements IResultatElementService {
 	    iResultatElement.save(resultat);
 
 	    return true;
+	}
+	
+	
+	@Override
+	public List<ResultatElement> getAllResultats() {
+		return iResultatElement.findAll();
 	}
 
 }

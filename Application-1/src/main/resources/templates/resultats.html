@@ -16,6 +16,24 @@
 		    background-color: rgba(255, 255, 255, 0.1);
 		    border-radius: 5px;
 		}
+		.card-sm {
+		    max-width: 300px; /* Largeur maximale de la carte */
+		    margin: 0 auto; /* Centrer la carte */
+		    padding: 10px; /* Espace intérieur réduit */
+		}
+
+		.card-sm .card-body {
+		    padding: 10px; /* Espace intérieur réduit */
+		}
+
+		.card-sm .form-select-sm {
+		    font-size: 0.875rem; /* Taille de police réduite */
+		}
+
+		.card-sm .btn-sm {
+		    font-size: 0.875rem; /* Taille de police réduite */
+		    padding: 0.25rem 0.5rem; /* Padding réduit */
+		}
 	</style>
 </head>
 <body>
@@ -23,6 +41,7 @@
         <div class="container">
             <a class="navbar-brand" href="/">Portail Université</a>
             <ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" href="/utilisateurs">Utilisateurs</a></li>
 				<li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
 			    <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
 				<li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
@@ -35,6 +54,93 @@
 
     <div class="container mt-5">
         <h1 class="mb-4">Liste des résultats</h1>
+		<!-- Nouvelle section pour la génération de fichiers (compacte et en haut) -->
+		 <div class="row mb-4">
+		     <!-- Générer un fichier de délibération -->
+		     <div class="col-md-4">
+		         <div class="card h-100">
+		             <div class="card-body">
+		                 <h5 class="card-title">
+		                     <i class="fas fa-file-excel text-success"></i> Délibération
+		                 </h5>
+		                 <form th:action="@{/generate-deliberation}" method="post">
+		                     <div class="mb-2">
+		                         <label for="niveauDeliberation" class="form-label">Niveau</label>
+		                         <select class="form-select form-select-sm" id="niveauDeliberation" name="niveau" required>
+		                             <option value="">-- Sélectionner --</option>
+		                             <option th:each="niveau : ${niveaux}" th:value="${niveau}" th:text="${niveau}"></option>
+		                         </select>
+		                     </div>
+		                     <button type="submit" class="btn btn-sm btn-primary">
+		                         <i class="fas fa-download"></i> Générer
+		                     </button>
+		                 </form>
+		             </div>
+		         </div>
+		     </div>
+
+		     <!-- Générer un fichier de notes pour un module -->
+		     <div class="col-md-4">
+		         <div class="card h-100">
+		             <div class="card-body">
+		                 <h5 class="card-title">
+		                     <i class="fas fa-file-excel text-success"></i> Notes (Module)
+		                 </h5>
+		                 <form th:action="@{/generate-notes}" method="post">
+		                     <div class="mb-2">
+		                         <label for="moduleNotes" class="form-label">Module</label>
+		                         <select class="form-select form-select-sm" id="moduleNotes" name="module" required>
+		                             <option value="">-- Sélectionner --</option>
+		                             <option th:each="module : ${modules}" th:value="${module.id}" th:text="${module.nom}"></option>
+		                         </select>
+		                     </div>
+		                     <div class="mb-2">
+		                         <label for="sessionNotes" class="form-label">Session</label>
+		                         <select class="form-select form-select-sm" id="sessionNotes" name="session" required>
+		                             <option value="">-- Sélectionner --</option>
+		                             <option value="Normale">Normale</option>
+		                             <option value="Rattrapage">Rattrapage</option>
+		                         </select>
+		                     </div>
+		                     <button type="submit" class="btn btn-sm btn-primary">
+		                         <i class="fas fa-download"></i> Générer
+		                     </button>
+		                 </form>
+		             </div>
+		         </div>
+		     </div>
+
+		     <!-- Générer une archive de notes pour un niveau -->
+		     <div class="col-md-4">
+		         <div class="card h-100">
+		             <div class="card-body">
+		                 <h5 class="card-title">
+		                     <i class="fas fa-file-excel text-success"></i> Archive (Niveau)
+		                 </h5>
+		                 <form th:action="@{/generate-archive}" method="post">
+		                     <div class="mb-2">
+		                         <label for="niveauArchive" class="form-label">Niveau</label>
+		                         <select class="form-select form-select-sm" id="niveauArchive" name="niveau" required>
+		                             <option value="">-- Sélectionner --</option>
+		                             <option th:each="niveau : ${niveaux}" th:value="${niveau}" th:text="${niveau}"></option>
+		                         </select>
+		                     </div>
+		                     <div class="mb-2">
+		                         <label for="sessionArchive" class="form-label">Session</label>
+		                         <select class="form-select form-select-sm" id="sessionArchive" name="session" required>
+		                             <option value="">-- Sélectionner --</option>
+		                             <option value="Normale">Normale</option>
+		                             <option value="Rattrapage">Rattrapage</option>
+		                         </select>
+		                     </div>
+		                     <button type="submit" class="btn btn-sm btn-primary">
+		                         <i class="fas fa-download"></i> Générer
+		                     </button>
+		                 </form>
+		             </div>
+		         </div>
+		     </div>
+		 </div>
         <div class="d-flex justify-content-between mb-3">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterResultatModal">
                 <i class="fas fa-plus"></i> Ajouter un résultat
@@ -66,9 +172,7 @@
                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modifierResultatModal">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
-                        <button class="btn btn-sm btn-danger">
-                            <i class="fas fa-trash"></i> Supprimer
-                        </button>
+
                     </td>
                 </tr>
             </tbody>

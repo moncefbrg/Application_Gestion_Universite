@@ -26,11 +26,11 @@
         <div class="container">
             <a class="navbar-brand" href="/">Portail Université</a>
             <ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link active" href="/utilisateurs">Utilisateurs</a></li>
                 <li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
                 <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
                 <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
                 <li class="nav-item"><a class="nav-link" href="/enseignants">Enseignants</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/utilisateurs">Utilisateurs</a></li>
                 <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
                 <li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
             </ul>
@@ -47,6 +47,7 @@
                 <tr>
                     <th>#</th>
                     <th>Nom d'utilisateur</th>
+					<th>Personne</th>
                     <th>Rôles</th>
                     <th>Statut</th>
 					<th>Verrouillé</th>
@@ -57,7 +58,8 @@
                 <tr th:each="utilisateur : ${utilisateurs}">
                     <td th:text="${utilisateur.id}"></td>
                     <td th:text="${utilisateur.username}"></td>
-                    <td th:text="${utilisateur.roles}"></td>
+					<td th:text="${utilisateur.personne.nom} + ' ' + ${utilisateur.personne.prenom}"></td>
+                    <td th:text="${utilisateur.role != null ? utilisateur.role.nom : 'Aucun rôle'}"></td>
 					<td>
 					    <span th:if="${utilisateur.enabled}" class="badge bg-success">Activé</span>
 					    <span th:unless="${utilisateur.enabled}" class="badge bg-danger">Désactivé</span>
@@ -75,12 +77,12 @@
                             <i class="fas fa-trash"></i> Supprimer
                         </a>
                         <a th:href="@{/utilisateurs/{id}/toggle-status(id=${utilisateur.id})}" class="btn btn-sm btn-secondary">
-                            <span th:if="${utilisateur.enabled}">Désactiver /</span>
+                            <span th:if="${utilisateur.enabled}">Désactiver</span>
                             <span th:unless="${utilisateur.enabled}">Activer</span>
                         </a>
 						<!-- Bouton pour verrouiller/déverrouiller -->
 						<a th:href="@{/utilisateurs/{id}/toggle-lock(id=${utilisateur.id})}" class="btn btn-sm btn-info">
-						    <span th:if="${utilisateur.locked}">Déverrouiller /</span>
+						    <span th:if="${utilisateur.locked}">Déverrouiller</span>
 						    <span th:unless="${utilisateur.locked}">Verrouiller</span>
 						</a>
                     </td>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un étudiant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Contenu principal -->
+    <div class="container mt-5">
+        <h1 class="mb-4">Modifier l'étudiant</h1>
+
+        <!-- Formulaire pour modifier un étudiant -->
+        <form th:action="@{/etudiants/{id}/edit(id=${etudiant.id})}" method="post">
+            <div class="mb-3">
+                <label for="nom" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="nom" name="nom" th:value="${etudiant.nom}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="prenom" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="prenom" name="prenom" th:value="${etudiant.prenom}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="cne" class="form-label">CNE</label>
+                <input type="text" class="form-control" id="cne" name="cne" th:value="${etudiant.cne}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="niveau" class="form-label">Niveau</label>
+                <select class="form-control" id="niveau" name="niveau" required>
+                    <option th:each="niveau : ${niveaux}"
+                            th:value="${niveau.id}"
+                            th:text="${niveau.nom}"
+                            th:selected="${niveau.id == etudiant.niveau.id}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="classe" class="form-label">Classe</label>
+                <select class="form-control" id="classe" name="classe" required>
+                    <option th:each="classe : ${classes}"
+                            th:value="${classe.id}"
+                            th:text="${classe.nom}"
+                            th:selected="${classe.id == etudiant.classe.id}"></option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            <a href="/etudiants" class="btn btn-secondary">Retour</a>
+        </form>
+    </div>
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

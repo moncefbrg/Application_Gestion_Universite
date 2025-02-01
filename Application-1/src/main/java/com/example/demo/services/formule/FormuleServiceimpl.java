@@ -69,4 +69,16 @@ public class FormuleServiceimpl implements IFormuleService{
         }
     }
 
+
+	@Override
+	public List<Formule> getAllFormules() {
+		return iFormule.findAll();
+	}
+
+
+	@Override
+	public List<Formule> getFormulesByIds(List<Long> ids) {
+		return iFormule.findAllById(ids);
+	}
+
 }

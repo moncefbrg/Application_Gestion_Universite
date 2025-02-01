@@ -23,6 +23,7 @@
         <div class="container">
             <a class="navbar-brand" href="/">Portail Université</a>
             <ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" href="/utilisateurs">Utilisateurs</a></li>
 				<li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
 			    <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
 				<li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
@@ -47,22 +48,25 @@
 	                    <th>Nom</th>
 	                    <th>Semestre</th>
 	                    <th>Enseignant Responsable</th>
-	                    <th>Éléments</th>
+						<th>Éléments associés</th>
 	                    <th>Actions</th>
 	                </tr>
 	            </thead>
 	            <tbody>
+					<tr th:if="${#lists.isEmpty(modules)}">
+					        <td colspan="5">Aucun module disponible</td>
+					    </tr>
 	                <tr th:each="module : ${modules}">
-	                    <td th:text="${module.id}"></td>
+	                    <td th:text="${module != null ? module.id : 'ID non disponible'}"></td>
 	                    <td th:text="${module.nom}"></td>
 	                    <td th:text="${module.semestre}"></td>
 	                    <td th:text="${module.enseignant.nom} + ' ' + ${module.enseignant.prenom}"></td>
-	                    <td>
-	                        <ul>
-	                            <li th:each="element : ${module.elements}" th:text="${element.nom}"></li>
-	                        </ul>
-	                    </td>
-	                    <td>
+						<td>
+						   <ul>
+						      <li th:each="element : ${module.elements}" th:text="${element.nom}"></li>
+						   </ul>
+						</td>
+						<td>
 	                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modifierModuleModal">
 	                            <i class="fas fa-edit"></i> Modifier
 	                        </button>
@@ -121,14 +125,6 @@
 		                        </select>
 		                    </div>
 
-		                    <!-- Champ pour les éléments -->
-		                    <div class="mb-3">
-		                        <label for="elements" class="form-label">Éléments</label>
-		                        <select class="form-control" id="elements" name="elements" multiple>
-		                            <option th:each="element : ${elements}" th:value="${element.id}" th:text="${element.nom}"></option>
-		                        </select>
-		                    </div>
-
 		                    <!-- Bouton pour enregistrer -->
 		                    <button type="submit" class="btn btn-primary">Enregistrer</button>
 		                </form>
@@ -146,24 +142,27 @@
 		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		            </div>
 		            <div class="modal-body">
-		                <form th:action="@{/modules/modifier/{id}(id=${module.id})}" method="post">
+		                <form th:action="@{/modules/modifier/{id}(id=${module != null ? module.id : ''})}" method="post">
 		                    <!-- Champ pour le nom du module -->
 		                    <div class="mb-3">
 		                        <label for="nom" class="form-label">Nom</label>
-		                        <input type="text" class="form-control" id="nom" name="nom" th:value="${module.nom}" required>
+		                        <input type="text" class="form-control" id="nom" name="nom" th:value="${module != null ? module.nom : ''}" required>
 		                    </div>
 
 		                    <!-- Champ pour le semestre -->
 		                    <div class="mb-3">
 		                        <label for="semestre" class="form-label">Semestre</label>
-		                        <input type="text" class="form-control" id="semestre" name="semestre" th:value="${module.semestre}" required>
+		                        <input type="text" class="form-control" id="semestre" name="semestre" th:value="${module != null ? module.semestre : ''}" required>
 		                    </div>
 
 		                    <!-- Champ pour le niveau -->
 		                    <div class="mb-3">
 		                        <label for="niveau" class="form-label">Niveau</label>
 		                        <select class="form-control" id="niveau" name="niveau" required>
-		                            <option th:each="niveau : ${niveaux}" th:value="${niveau.id}" th:text="${niveau.nom}" th:selected="${module.niveau != null && module.niveau.id == niveau.id}"></option>
+		                            <option th:each="niveau : ${niveaux}" 
+									th:value="${niveau.id}" 
+									th:text="${niveau.nom}" 
+									th:selected="${module.niveau != null && module.niveau.id == niveau.id}"></option>
 		                        </select>
 		                    </div>
 
@@ -172,14 +171,6 @@
 		                        <label for="enseignant" class="form-label">Enseignant Responsable</label>
 		                        <select class="form-control" id="enseignant" name="enseignant" required>
 		                            <option th:each="enseignant : ${enseignants}" th:value="${enseignant.id}" th:text="${enseignant.nom} + ' ' + ${enseignant.prenom}" th:selected="${module.enseignant != null && module.enseignant.id == enseignant.id}"></option>
-		                        </select>
-		                    </div>
-
-		                    <!-- Champ pour les éléments -->
-		                    <div class="mb-3">
-		                        <label for="elements" class="form-label">Éléments</label>
-		                        <select class="form-control" id="elements" name="elements" multiple>
-		                            <option th:each="element : ${elements}" th:value="${element.id}" th:text="${element.nom}" th:selected="${module.elements.contains(element)}"></option>
 		                        </select>
 		                    </div>
 

@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -17,7 +18,10 @@ public class Seuil {
     @Id
     private Long id;
     
-    private double XNormale;   // le seuil X de la session normale
+    @Column(name="xnormale")
+    private double XNormale;// le seuil X de la session normale
+    
+    @Column(name="yrattrapage")
     private double YRattrapage; // le seuil Y de la session rattrapage
 
     // Ajoute la relation avec Niveau

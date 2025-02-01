@@ -14,7 +14,7 @@ public interface INiveauService {
 	public boolean checkExistanceNiveau(Long id);
 	public boolean associerSeuilNiveau(Niveau niveau,Seuil seuil)throws Exception;
 	public boolean separerSeuilNiveau(Niveau niveau,Seuil seuil)throws Exception;
-
-
+	public List<Niveau> getAllNiveaux();
+	public Niveau getNiveauById(Long id); 
 
 }

@@ -9,5 +9,7 @@ public interface IFormuleService {
 	public Formule creerFormule(Long id,String nom,String expression,List<String> param,Niveau niveau);
 	public Formule modifierFormule(Long id,String nouveauNom,String nouvelleExpression,List<String> nParam);
 	public boolean supprimerFormule(Long id);
+	public List<Formule> getAllFormules();
+	public List<Formule> getFormulesByIds(List<Long> ids);
 
 }

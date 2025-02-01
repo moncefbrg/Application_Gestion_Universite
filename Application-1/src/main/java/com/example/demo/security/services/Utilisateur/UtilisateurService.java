@@ -1,6 +1,7 @@
 package com.example.demo.security.services.Utilisateur;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,12 @@ import com.example.demo.security.repositories.IUtilisateur;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.security.entities.Personne;
 import com.example.demo.security.entities.Role;
 import com.example.demo.security.entities.Utilisateur;
 
 @Service
-public class UtilisateurService implements UserDetailsService {
+public class UtilisateurService implements UserDetailsService, IUtilisateurService {
 	@Autowired
 	private IUtilisateur iutilisateur;
 	
@@ -49,38 +51,57 @@ public class UtilisateurService implements UserDetailsService {
 		return new User(
 				utilisateur.getUsername(), 
 				utilisateur.getPassword(),
+				utilisateur.isEnabled(),
+				true,
+				true,
+				!utilisateur.isLocked(),
 				Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + utilisateur.getRole().getNom())));
 	}
 	
 	@Transactional
-	public Utilisateur creerUtilisateur(Long id,String username, String password, String roleName) {
-		//on verifie si l'utilisateur existe deja
-		if(iutilisateur.findByUsername(username).isPresent()) {
-			throw new RuntimeException("Ce nom d'utilisateur est déjà pris !");
-		}
-		
-		Role role= irole.findByNom(roleName)
-				.orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
-		
-	    // Vérifier si le rôle ADMIN_USER est déjà attribué
-		if ("ADMIN_USER".equals(role.getNom()) && iutilisateur.findAll().stream()
-                .anyMatch(utilisateur -> "ADMIN_USER".equals(utilisateur.getRole().getNom()))) {
-            throw new RuntimeException("Un compte ADMIN_USER existe déjà.");
+	public Utilisateur creerUtilisateur(Long id, String username, String password, String roleName) {
+	    // Vérifier si l'utilisateur existe déjà
+	    if (iutilisateur.findByUsername(username).isPresent()) {
+	        throw new RuntimeException("Ce nom d'utilisateur est déjà pris !");
 	    }
-		
-		//encoder le mot de passe avant de l'enregistrer
-		String encodedPassword=passwordEncoder.encode(password);
-		
-		//creer un nouvel user avec role specifié
-		Utilisateur utilisateur=new Utilisateur();
-		utilisateur.setId(id);
-		utilisateur.setUsername(username);
-		utilisateur.setPassword(encodedPassword);
-		utilisateur.setRole(role);
-		
-		//enregistrer dans la bd
-		return iutilisateur.save(utilisateur);
-		
+
+	    // Trouver le rôle
+	    Role role = irole.findByNom(roleName)
+	            .orElseThrow(() -> new RuntimeException("Rôle non trouvé"));
+
+	    // Vérifier si le rôle ADMIN_USER est déjà attribué
+	    if ("ADMIN_USER".equals(role.getNom()) && iutilisateur.findAll().stream()
+	            .anyMatch(utilisateur -> "ADMIN_USER".equals(utilisateur.getRole().getNom()))) {
+	        throw new RuntimeException("Un compte ADMIN_USER existe déjà.");
+	    }
+
+	    // Créer une nouvelle Personne pour l'utilisateur admin
+	    Personne personne = new Personne();
+	    personne.setId(id); // Utiliser le même ID que l'utilisateur
+	    personne.setNom("Admin");
+	    personne.setPrenom("User");
+	    personne.setCin("ADMIN123"); // Exemple de CIN
+	    personne.setEmail("admin@example.com"); // Exemple d'email
+	    personne.setTelephone("123456789"); // Exemple de téléphone
+
+	    // Enregistrer la Personne dans la base de données
+	    ipersonne.save(personne);
+
+	    // Encoder le mot de passe avant de l'enregistrer
+	    String encodedPassword = passwordEncoder.encode(password);
+
+	    // Créer un nouvel utilisateur avec le rôle spécifié
+	    Utilisateur utilisateur = new Utilisateur();
+	    utilisateur.setId(id);
+	    utilisateur.setUsername(username);
+	    utilisateur.setPassword(encodedPassword);
+	    utilisateur.setRole(role);
+	    utilisateur.setPersonne(personne); // Associer la Personne à l'Utilisateur
+	    utilisateur.setEnabled(true); // Activer le compte par défaut
+	    utilisateur.setLocked(false); // Déverrouiller le compte par défaut
+
+	    // Enregistrer dans la BD
+	    return iutilisateur.save(utilisateur);
 	}
 	
 	@Transactional
@@ -153,5 +174,49 @@ public class UtilisateurService implements UserDetailsService {
         }
 
         return username;
-    }	
+    }
+
+	@Override
+	@Transactional
+	public void supprimerUtilisateur(Long id) {
+		if(!iutilisateur.existsById(id)) {
+			throw new RuntimeException("Utilisateur non trouvé avec l'ID : " + id);
+		}
+		
+		iutilisateur.deleteById(id);
+		
+	}
+
+	@Override
+	@Transactional
+	public void toggleStatus(Long id) {
+		Utilisateur utilisateur= iutilisateur.findById(id)
+				.orElseThrow(() -> new RuntimeException(("Utilisateur non trouvé avec l'ID " + id)));
+		
+		utilisateur.setEnabled(!utilisateur.isEnabled());
+		iutilisateur.save(utilisateur);	
+	}
+
+	@Override
+	@Transactional
+	public void toggleLock(Long id) {
+		Utilisateur utilisateur = iutilisateur.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + id));
+
+	    utilisateur.setLocked(!utilisateur.isLocked());
+	    iutilisateur.save(utilisateur);
+		
+	}
+
+	@Override
+	@Transactional(readOnly=true)
+	public Utilisateur getUtilisateurById(Long id) {
+		return iutilisateur.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + id));	
+	}
+
+	@Override
+	public List<Utilisateur> getAllUtilisateurs() {
+		return iutilisateur.findAll();
+	}	
 }

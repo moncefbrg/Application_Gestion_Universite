@@ -1,5 +1,7 @@
 package com.example.demo.services.seuil;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,4 +58,15 @@ public class SeuilServiceImpl implements ISeuilService {
             return false;
         }
     }
+
+	@Override
+	public List<Seuil> getAllSeuils() {
+		return seuilRepository.findAll();
+	}
+
+	@Override
+	public Seuil getSeuilById(Long id) {
+		return seuilRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Seuil non trouvé avec l'ID :" + id));
+	}
 }

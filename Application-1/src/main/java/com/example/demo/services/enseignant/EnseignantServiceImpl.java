@@ -153,6 +153,26 @@ public class EnseignantServiceImpl implements IEnseignantService {
 
 	    return true; // Retourne true si la modification est réussie
 	}
+
+	@Override
+	public List<Enseignant> getAllEnseignants() {
+		return iEnseignant.findAll();
+	}
+
+	@Override
+	public Optional<Enseignant> getEnseignantById(Long id) {
+		return iEnseignant.findById(id);
+	}
+
+	@Override
+	public List<Enseignant> findAll() {
+		return iEnseignant.findAll();
+	}
+
+	@Override
+	public Optional<Enseignant> findById(Long id) {
+		return iEnseignant.findById(id);
+	}
 	
 
 }
