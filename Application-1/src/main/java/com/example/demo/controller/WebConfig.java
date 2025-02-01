@@ -1,4 +1,4 @@
-package com.example.demo.web;
+package com.example.demo.controller;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

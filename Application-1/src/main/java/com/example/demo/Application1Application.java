@@ -1,9 +1,10 @@
 package com.example.demo;
 
-import com.example.demo.entities.Module;
-import com.example.demo.entities.Niveau;
-import com.example.demo.entities.Seuil;
 import com.example.demo.repositories.INiveau;
+import com.example.demo.security.entities.Personne;
+import com.example.demo.security.entities.Role;
+import com.example.demo.security.repositories.IPersonne;
+import com.example.demo.security.repositories.IRole;
 import com.example.demo.security.repositories.IUtilisateur;
 import com.example.demo.security.services.Utilisateur.UtilisateurService;
 import com.example.demo.services.Etudiant.IEtudiantService;
@@ -19,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +43,12 @@ public class Application1Application implements CommandLineRunner {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private IRole iRole;
+	
+	@Autowired
+	private IPersonne iPersonne;
 
     public static void main(String[] args) {
         SpringApplication.run(Application1Application.class, args);
@@ -87,27 +93,43 @@ public class Application1Application implements CommandLineRunner {
 			  //iClasseService.consulterClasse("M11");
 	  }; }
 
-	@Override
-    public void run(String... args) throws Exception {
-    	//verifier si un compte ADMIN_USER existe déjà
-    	if(!iutilisateur.existsByUsername("admin")) {
-    		//creer un compte ADMIN_USER
-    		Set<String> roles= new HashSet<>();
-    		roles.add("ADMIN_USER");
-    		
-    		utilisateurService.inscrireUtilisateur(
-    				(long)1,
-    				"admin",
-    				"admin123",
-    				 roles
-    		);
-    		
-    		System.out.println("Compte ADMIN_USER créé avec succès !");
-    		
-    	} else {
-    		System.out.println("Un compte ADMIN_USER existe déjà.");
-    	}
-    }
+	  @Override
+	  public void run(String... args) throws Exception {
+	      // Vérifier si le rôle ADMIN_USER existe déjà
+	      if (!iRole.existsByNom("ADMIN_USER")) {
+	          // Créer le rôle ADMIN_USER
+	          Role adminRole = new Role();
+	          adminRole.setNom("ADMIN_USER");
+	          iRole.save(adminRole);
+	          System.out.println("Rôle ADMIN_USER créé avec succès !");
+	      }
+
+	      // Vérifier si un compte ADMIN_USER existe déjà
+	      if (!iutilisateur.existsByUsername("admin")) {
+	          // Créer une Personne pour l'utilisateur admin
+	          Personne adminPersonne = new Personne();
+	          adminPersonne.setId((long) 1); // Utiliser le même ID que l'utilisateur
+	          adminPersonne.setNom("Admin");
+	          adminPersonne.setPrenom("User");
+	          adminPersonne.setCin("ADMIN123");
+	          adminPersonne.setEmail("admin@example.com");
+	          adminPersonne.setTelephone("123456789");
+
+	          // Enregistrer la Personne dans la base de données
+	          iPersonne.save(adminPersonne);
+
+	          // Créer un compte ADMIN_USER
+	          utilisateurService.creerUtilisateur(
+	                  (long) 1,
+	                  "admin",
+	                  "admin123", // Mot de passe en clair
+	                  "ADMIN_USER"
+	          );
+	          System.out.println("Compte ADMIN_USER créé avec succès !");
+	      } else {
+	          System.out.println("Un compte ADMIN_USER existe déjà.");
+	      }
+	  }
 	  
 	  
 	  

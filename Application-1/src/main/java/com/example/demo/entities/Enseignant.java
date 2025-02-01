@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -25,10 +26,11 @@ public class Enseignant {
     private String nom;
     private String prenom;
     
-    @Column(unique = true)
+    @Column(unique = true, nullable=false)
     private String cni;
     
     @OneToMany(mappedBy = "enseignant", cascade = CascadeType.ALL, orphanRemoval = true,fetch=FetchType.EAGER)
+    @ToString.Exclude
     private List<Module> modules;
 }
 

@@ -15,5 +15,11 @@ public interface IClasseService {
 	public List<Etudiant> consulterClasse(String nom);
 	public boolean associerClasseNiveau(Classe classe,Niveau niveau)throws Exception;
 	public boolean separerClasseNiveau(Classe classe,Niveau niveau)throws Exception;
+	public List<Etudiant> getTousLesEtudiants();
+	public List<Classe> getAllClasses();
+	public Classe getClasseById(Long id);
+	public Classe getClasseByNom(String nom);
+	public void save(Classe classe);
+	
 	
 }

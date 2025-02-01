@@ -1,13 +1,10 @@
 package com.example.demo.security.entities;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,15 +25,12 @@ public class Utilisateur {
 	private boolean enabled = true; //par défaut, activé
 	private boolean locked = false;
 	
-	@ElementCollection(fetch=FetchType.EAGER)
-	private Set<String> roles = new HashSet<>();
+	@ManyToOne
+	@JoinColumn(name="personne_id", nullable=false)
+	private Personne personne;  //chaque compte est lié à une seule personne
 	
-	public void addRole(String role) {
-		this.roles.add(role);
-	}
-	
-	public void removeRole(String role) {
-		this.roles.remove(role);
-	}
+	@ManyToOne
+	@JoinColumn(name="role_id", nullable=false)
+	private Role role;    //chaque compte a un seul role 
 		
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Modifier Module</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Modifier Module</h1>
+
+        <form th:action="@{/modules/{id}/edit(id=${module.id})}" method="post">
+            <div class="form-group">
+                <label for="nom">Nom</label>
+                <input type="text" id="nom" name="nom" th:value="${module.nom}" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="semestre">Semestre</label>
+                <input type="text" id="semestre" name="semestre" th:value="${module.semestre}" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="niveau">Niveau</label>
+                <select id="niveau" name="niveauId" class="form-control">
+                    <option th:each="niveau : ${niveaux}" 
+                            th:value="${niveau.id}" 
+                            th:text="${niveau.nom}" 
+                            th:selected="${niveau.id == module.niveau.id}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="enseignant">Enseignant</label>
+                <select id="enseignant" name="enseignantId" class="form-control">
+                    <option th:each="enseignant : ${enseignants}" 
+                            th:value="${enseignant.id}" 
+                            th:text="${enseignant.nom + ' ' + enseignant.prenom}" 
+                            th:selected="${enseignant.id == module.enseignant != null ? module.enseignant.id : null}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Modifier</button>
+            </div>
+        </form>
+
+        <a href="/modules" class="btn btn-secondary">Retour à la liste des modules</a>
+    </div>
+</body>
+</html>

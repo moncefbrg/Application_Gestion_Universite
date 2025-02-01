@@ -1,5 +1,8 @@
 package com.example.demo.services.module;
-//log done
+
+
+import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -183,5 +186,22 @@ public class ModuleServiceImpl implements IModuleService{
 	    iModule.save(module);
 	    logger.info("Association d'enseignant"+enseignant.getId()+" au module :"+module.getNom());
 
+	}
+
+	@Override
+	public List<Module> getAllModules() {
+		List<Module> modules= iModule.findAll();
+		return  (modules != null) ? modules : new ArrayList<>(); // Si null, retourne une liste vide
+	}
+	
+	@Override
+	public List<Module> getModulesByIds(List<Long> ids) {
+		return iModule.findAllById(ids);
+	}
+
+	@Override
+	public Module getModuleById(Long id) {
+		return iModule.findById(id)
+				.orElseThrow(() -> new RuntimeException("Module non trouvé avec l'ID : " + id));
 	}
 }

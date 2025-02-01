@@ -30,32 +30,34 @@ public class SecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-		     .authorizeHttpRequests((requests) -> requests
-		    		 .requestMatchers("/","/login").permitAll() //pages accessibles sans connexion
-		    		 .requestMatchers("/admin/**").hasRole("ADMIN_USER") //proteger les routes admin
-		    		 .requestMatchers("/etudiants/**").hasRole("ADMIN_NOTE")
-		    		 .requestMatchers("/niveaux/**","/modules/**").hasRole("ADMIN_SP")
-		    		 .anyRequest().authenticated() //tout le reste nécessite une authenification
-		     )
-		     
-		     .formLogin((form) -> form
-		    		 .loginPage("/login")  //page de cnx personnalisée
-		    		 .defaultSuccessUrl("/acceuil", true)   //redirection après cnx réussie
-		    		 .permitAll()
-		     )
-		     
-		     .logout((logout) -> logout
-		    		 .logoutSuccessUrl("/")
-		    		 .permitAll()
-		     )
-		     
-		     .exceptionHandling(ex -> ex
-		    		 .accessDeniedPage("/403") //page d'erreur, accès refusé		     
-		     );
-		   
-		return http.build();
-		     		     
+	    http
+	        .authorizeHttpRequests((requests) -> requests
+	            .requestMatchers("/", "/login").permitAll() // Pages accessibles sans connexion
+	            .requestMatchers("/**", "/niveaux/**").hasRole("ADMIN_USER") // Protéger les routes admin
+	            .requestMatchers("/etudiants/**").hasRole("ADMIN_NOTE")
+	            .requestMatchers("/niveaux/**", "/modules/**").hasRole("ADMIN_SP")
+	            .anyRequest().authenticated() // Tout le reste nécessite une authentification
+	        )
+	        .formLogin((form) -> form
+	            .loginPage("/login")  // Page de connexion personnalisée
+	            .defaultSuccessUrl("/acceuil", true)   // Redirection après connexion réussie
+	            .failureUrl("/login?error=true") // Redirection en cas d'échec de connexion
+	            .permitAll()
+	        )
+	        .logout((logout) -> logout
+	            .logoutSuccessUrl("/")
+	            .permitAll()
+	        )
+	        .exceptionHandling(ex -> ex
+	            .accessDeniedPage("/403") // Page d'erreur, accès refusé
+	        );
+
+	    return http.build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+	    return new BCryptPasswordEncoder();
 	}
 	
 	/*
@@ -64,10 +66,10 @@ public class SecurityConfig {
 	 * Exception { return authConfig.getAuthenticationManager(); }
 	 */
 	
-	@Bean
-	public PasswordEncoder passwordEncoder() { //pour encoder les mdp avant de les stocker en base
-		return new BCryptPasswordEncoder();
-	}
+	/*
+	 * @Bean public PasswordEncoder passwordEncoder() { //pour encoder les mdp avant
+	 * de les stocker en base return new BCryptPasswordEncoder(); }
+	 */
 	
 	/*
 	 * @Bean public AuthenticationProvider authenticationProvider() {

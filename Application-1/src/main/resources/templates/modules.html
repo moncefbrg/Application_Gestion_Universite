@@ -4,67 +4,206 @@
     <title>Modules</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+	<style>
+	    .navbar {
+	        background-color: #004080;
+	    }
+	    .navbar-brand, .nav-link {
+	        color: white !important;
+	    }
+		.navbar .nav-link.active {
+		    font-weight: bold;
+		    background-color: rgba(255, 255, 255, 0.1);
+		    border-radius: 5px;
+		}
+	</style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="/">Portail Université</a>
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
-                <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
-                <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/modules">Modules</a></li>
-                <li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
-            </ul>
+				<li class="nav-item"><a class="nav-link" href="/utilisateurs">Utilisateurs</a></li>
+				<li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
+			    <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
+				<li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
+				<li class="nav-item"><a class="nav-link" href="/enseignants">Enseignants</a></li>
+				<li class="nav-item"><a class="nav-link active" href="/modules">Modules</a></li>
+				<li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
+			</ul>
         </div>
     </nav>
-    <div class="container mt-5">
-        <h1 class="mb-4">Liste des modules</h1>
-        <button class="btn btn-primary mb-3">+ Ajouter un module</button>
-        <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Rechercher...">
-        </div>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nom</th>
-                    <th>Code</th>
-                    <th>Enseignant Responsable</th>
-                    <th>Éléments</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="module : ${modules}">
-                    <td th:text="${module.id}"></td>
-                    <td th:text="${module.nom}"></td>
-                    <td th:text="${module.code}"></td>
-                    <td th:text="${module.enseignant.nom} + ' ' + ${module.enseignant.prenom}"></td>
-                    <td>
-                        <ul>
-                            <li th:each="element : ${module.elements}" th:text="${element.nom}"></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <a th:href="@{/modules/modifier/{id}(id=${module.id})}" class="btn btn-warning btn-sm">
-                            <i class="fas fa-edit"></i> Modifier
-                        </a>
-                        <a th:href="@{/modules/supprimer/{id}(id=${module.id})}" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> Supprimer
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="d-flex justify-content-between">
-            <div>Afficher 10 entrées</div>
-            <div>
-                <button class="btn btn-secondary">Précédente</button>
-                <button class="btn btn-secondary">Suivante</button>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+	    <div class="container mt-5">
+	        <h1 class="mb-4">Liste des modules</h1>
+	        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#ajouterModuleModal">
+	            + Ajouter un module
+	        </button>
+	        <div class="mb-3">
+	            <input type="text" class="form-control" placeholder="Rechercher...">
+	        </div>
+	        <table class="table table-striped">
+	            <thead>
+	                <tr>
+	                    <th>#</th>
+	                    <th>Nom</th>
+	                    <th>Semestre</th>
+	                    <th>Enseignant Responsable</th>
+						<th>Éléments associés</th>
+	                    <th>Actions</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+					<tr th:if="${#lists.isEmpty(modules)}">
+					        <td colspan="5">Aucun module disponible</td>
+					    </tr>
+	                <tr th:each="module : ${modules}">
+	                    <td th:text="${module != null ? module.id : 'ID non disponible'}"></td>
+	                    <td th:text="${module.nom}"></td>
+	                    <td th:text="${module.semestre}"></td>
+	                    <td th:text="${module.enseignant.nom} + ' ' + ${module.enseignant.prenom}"></td>
+						<td>
+						   <ul>
+						      <li th:each="element : ${module.elements}" th:text="${element.nom}"></li>
+						   </ul>
+						</td>
+						<td>
+	                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modifierModuleModal">
+	                            <i class="fas fa-edit"></i> Modifier
+	                        </button>
+	                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#supprimerModuleModal">
+	                            <i class="fas fa-trash"></i> Supprimer
+	                        </button>
+	                    </td>
+	                </tr>
+	            </tbody>
+	        </table>
+	        <div class="d-flex justify-content-between">
+	            <div>Afficher 10 entrées</div>
+	            <div>
+	                <button class="btn btn-secondary">Précédente</button>
+	                <button class="btn btn-secondary">Suivante</button>
+	            </div>
+	        </div>
+	    </div>
+
+	    <!-- Modals -->
+		<!-- Modal pour ajouter un module -->
+		<div class="modal fade" id="ajouterModuleModal" tabindex="-1" aria-labelledby="ajouterModuleModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <h5 class="modal-title" id="ajouterModuleModalLabel">Ajouter un module</h5>
+		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+		                <form th:action="@{/modules}" method="post">
+		                    <!-- Champ pour le nom du module -->
+		                    <div class="mb-3">
+		                        <label for="nom" class="form-label">Nom</label>
+		                        <input type="text" class="form-control" id="nom" name="nom" required>
+		                    </div>
+
+		                    <!-- Champ pour le semestre -->
+		                    <div class="mb-3">
+		                        <label for="semestre" class="form-label">Semestre</label>
+		                        <input type="text" class="form-control" id="semestre" name="semestre" required>
+		                    </div>
+
+		                    <!-- Champ pour le niveau -->
+		                    <div class="mb-3">
+		                        <label for="niveau" class="form-label">Niveau</label>
+		                        <select class="form-control" id="niveau" name="niveau" required>
+		                            <option th:each="niveau : ${niveaux}" th:value="${niveau.id}" th:text="${niveau.nom}"></option>
+		                        </select>
+		                    </div>
+
+		                    <!-- Champ pour l'enseignant responsable -->
+		                    <div class="mb-3">
+		                        <label for="enseignant" class="form-label">Enseignant Responsable</label>
+		                        <select class="form-control" id="enseignant" name="enseignant" required>
+		                            <option th:each="enseignant : ${enseignants}" th:value="${enseignant.id}" th:text="${enseignant.nom} + ' ' + ${enseignant.prenom}"></option>
+		                        </select>
+		                    </div>
+
+		                    <!-- Bouton pour enregistrer -->
+		                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+		                </form>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+		<!-- Modal pour modifier un module -->
+		<div class="modal fade" id="modifierModuleModal" tabindex="-1" aria-labelledby="modifierModuleModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <h5 class="modal-title" id="modifierModuleModalLabel">Modifier un module</h5>
+		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+		                <form th:action="@{/modules/modifier/{id}(id=${module != null ? module.id : ''})}" method="post">
+		                    <!-- Champ pour le nom du module -->
+		                    <div class="mb-3">
+		                        <label for="nom" class="form-label">Nom</label>
+		                        <input type="text" class="form-control" id="nom" name="nom" th:value="${module != null ? module.nom : ''}" required>
+		                    </div>
+
+		                    <!-- Champ pour le semestre -->
+		                    <div class="mb-3">
+		                        <label for="semestre" class="form-label">Semestre</label>
+		                        <input type="text" class="form-control" id="semestre" name="semestre" th:value="${module != null ? module.semestre : ''}" required>
+		                    </div>
+
+		                    <!-- Champ pour le niveau -->
+		                    <div class="mb-3">
+		                        <label for="niveau" class="form-label">Niveau</label>
+		                        <select class="form-control" id="niveau" name="niveau" required>
+		                            <option th:each="niveau : ${niveaux}" 
+									th:value="${niveau.id}" 
+									th:text="${niveau.nom}" 
+									th:selected="${module.niveau != null && module.niveau.id == niveau.id}"></option>
+		                        </select>
+		                    </div>
+
+		                    <!-- Champ pour l'enseignant responsable -->
+		                    <div class="mb-3">
+		                        <label for="enseignant" class="form-label">Enseignant Responsable</label>
+		                        <select class="form-control" id="enseignant" name="enseignant" required>
+		                            <option th:each="enseignant : ${enseignants}" th:value="${enseignant.id}" th:text="${enseignant.nom} + ' ' + ${enseignant.prenom}" th:selected="${module.enseignant != null && module.enseignant.id == enseignant.id}"></option>
+		                        </select>
+		                    </div>
+
+		                    <!-- Bouton pour enregistrer -->
+		                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+		                </form>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+		<!-- Modal pour supprimer un module -->
+		<div class="modal fade" id="supprimerModuleModal" tabindex="-1" aria-labelledby="supprimerModuleModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <h5 class="modal-title" id="supprimerModuleModalLabel">Supprimer un module</h5>
+		                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+		                <p>Êtes-vous sûr de vouloir supprimer ce module ?</p>
+		                <form th:action="@{/modules/supprimer/{id}(id=${module.id})}" method="post">
+		                    <button type="submit" class="btn btn-danger">Supprimer</button>
+		                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+		                </form>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+	    <!-- Scripts JavaScript -->
+	    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+	</html>
 

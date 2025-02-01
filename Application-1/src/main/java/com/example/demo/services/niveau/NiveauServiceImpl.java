@@ -1,6 +1,7 @@
 package com.example.demo.services.niveau;
 //log done
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -258,4 +259,22 @@ public class NiveauServiceImpl implements INiveauService{
 
 	    return true;
 	}
-}
+	
+	
+	@Override
+	public List<Niveau> getAllNiveaux() {
+		return iNiveau.findAll();
+	}
+	
+	
+	@Override
+	public Niveau getNiveauById(Long id) {
+		List<Niveau> niveaux=iNiveau.findAll();
+		// Filtrer les objets null
+	    niveaux.removeIf(Objects::isNull);
+	    
+	    return (Niveau) niveaux;
+	}
+	
+}	
+

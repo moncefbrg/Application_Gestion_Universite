@@ -12,4 +12,8 @@ public interface IModuleService {
 	public boolean modifierModule(Long id,String nom,String  semestre,List<Element> elements);
 	public boolean supprimerModule(Long id);
 	public void associerModuleEnseignant(Module module,Enseignant enseignant) throws Exception;
+	public List<Module> getAllModules();
+	public List<Module> getModulesByIds(List<Long> ids);
+	public Module getModuleById(Long id) throws Exception;
+
 }

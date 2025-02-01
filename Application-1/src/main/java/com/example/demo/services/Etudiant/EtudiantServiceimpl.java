@@ -193,7 +193,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	}
 	
 	@Override @Transactional
-	public Etudiant modifierEtudiant(Long id,String cne, String nom, String prenom, Long niveau) {
+	public boolean modifierEtudiant(Long id,String cne, String nom, String prenom, Long niveau) {
 		Optional<Etudiant> e=ietudiant.findById(id);
 		if(!(e.isEmpty())){
 			Etudiant e1=e.get();
@@ -206,9 +206,9 @@ public class EtudiantServiceimpl implements IEtudiantService{
 			}
 			logger.info("Étudiant modifie : " +id+"avec :"+cne+","+nom+","+prenom+","+niveau);
 			ietudiant.save(e1);
-			return e1;
+			return true; //si la modif a reussi
 		}else {
-			return null;
+			return false; 
 		}
 	}
 
@@ -348,5 +348,18 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    return true;
 	}
+
+
+	@Override
+	public List<Etudiant> getAllEtudiants() {
+		return ietudiant.findAll();
+	}
+
+
+	@Override
+	public Optional<Etudiant> findById(Long id) {
+		return ietudiant.findById(id);
+	}
+
 
 }

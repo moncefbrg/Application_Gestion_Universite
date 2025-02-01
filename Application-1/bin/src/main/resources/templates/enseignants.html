@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Enseignants</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Portail Université</a>
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/enseignants">Enseignants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
+                <li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="mb-4">Liste des enseignants</h1>
+        <!-- Bouton pour ajouter un enseignant -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#ajouterEnseignantModal">
+            <i class="fas fa-plus"></i> Ajouter un enseignant
+        </button>
+        <table id="table-enseignants" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>CNI</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Module associé</th>
+                    <th>Email</th>
+                    <th>Actions</th> <!-- Nouvelle colonne pour les boutons d'action -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="enseignant : ${enseignants}">
+                    <td th:text="${enseignant.id}"></td>
+                    <td th:text="${enseignant.cni}"></td>
+                    <td th:text="${enseignant.nom}"></td>
+                    <td th:text="${enseignant.prenom}"></td>
+                    <td th:text="${enseignant.module.nom}"></td>
+                    <td th:text="${enseignant.email}"></td>
+                    <td>
+                        <!-- Boutons d'action -->
+                        <a th:href="@{/enseignants/{id}/edit(id=${enseignant.id})}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a th:href="@{/enseignants/{id}/delete(id=${enseignant.id})}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal pour ajouter un enseignant -->
+    <div class="modal fade" id="ajouterEnseignantModal" tabindex="-1" aria-labelledby="ajouterEnseignantModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterEnseignantModalLabel">Ajouter un enseignant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/enseignants}" method="post">
+                        <div class="mb-3">
+                            <label for="cni" class="form-label">CNI</label>
+                            <input type="text" class="form-control" id="cni" name="cni" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prenom" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="module" class="form-label">Module associé</label>
+                            <select class="form-control" id="module" name="module" required>
+                                <option th:each="module : ${modules}" th:value="${module.id}" th:text="${module.nom}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialisation de DataTables
+            $('#table-enseignants').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' // Traduction en français
+                }
+            });
+        });
+    </script>
+</body>
+</html>

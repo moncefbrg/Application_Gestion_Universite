@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Utilisateurs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background-color: #004080;
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .navbar .nav-link.active {
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">Portail Université</a>
+            <ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link active" href="/utilisateurs">Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/etudiants">Étudiants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/niveaux">Niveaux</a></li>
+                <li class="nav-item"><a class="nav-link" href="/classes">Classes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enseignants">Enseignants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
+                <li class="nav-item"><a class="nav-link" href="/resultats">Résultats</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="mb-4">Liste des utilisateurs</h1>
+        <!-- Bouton pour ajouter un utilisateur -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#ajouterUtilisateurModal">
+            <i class="fas fa-plus"></i> Ajouter un utilisateur
+        </button>
+        <table id="table-utilisateurs" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom d'utilisateur</th>
+					<th>Personne</th>
+                    <th>Rôles</th>
+                    <th>Statut</th>
+					<th>Verrouillé</th>
+                    <th>Actions</th> <!-- Nouvelle colonne pour les boutons d'action -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="utilisateur : ${utilisateurs}">
+                    <td th:text="${utilisateur.id}"></td>
+                    <td th:text="${utilisateur.username}"></td>
+					<td th:text="${utilisateur.personne.nom} + ' ' + ${utilisateur.personne.prenom}"></td>
+                    <td th:text="${utilisateur.role != null ? utilisateur.role.nom : 'Aucun rôle'}"></td>
+					<td>
+					    <span th:if="${utilisateur.enabled}" class="badge bg-success">Activé</span>
+					    <span th:unless="${utilisateur.enabled}" class="badge bg-danger">Désactivé</span>
+					</td>
+					<td>
+					    <span th:if="${utilisateur.locked}" class="badge bg-danger">Verrouillé</span>
+					    <span th:unless="${utilisateur.locked}" class="badge bg-success">Déverrouillé</span>
+					</td>
+					<td>
+                        <!-- Boutons d'action -->
+                        <a th:href="@{/utilisateurs/{id}/edit(id=${utilisateur.id})}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a th:href="@{/utilisateurs/{id}/delete(id=${utilisateur.id})}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                        <a th:href="@{/utilisateurs/{id}/toggle-status(id=${utilisateur.id})}" class="btn btn-sm btn-secondary">
+                            <span th:if="${utilisateur.enabled}">Désactiver</span>
+                            <span th:unless="${utilisateur.enabled}">Activer</span>
+                        </a>
+						<!-- Bouton pour verrouiller/déverrouiller -->
+						<a th:href="@{/utilisateurs/{id}/toggle-lock(id=${utilisateur.id})}" class="btn btn-sm btn-info">
+						    <span th:if="${utilisateur.locked}">Déverrouiller</span>
+						    <span th:unless="${utilisateur.locked}">Verrouiller</span>
+						</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal pour ajouter un utilisateur -->
+    <div class="modal fade" id="ajouterUtilisateurModal" tabindex="-1" aria-labelledby="ajouterUtilisateurModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterUtilisateurModalLabel">Ajouter un utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/utilisateurs}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="roles" class="form-label">Rôles</label>
+                            <select class="form-control" id="roles" name="roles" multiple required>
+                                <option value="ADMIN_USER">ADMIN_USER</option>
+                                <option value="ADMIN_SP">ADMIN_SP</option>
+                                <option value="ADMIN_NOTES">ADMIN_NOTES</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialisation de DataTables
+            $('#table-utilisateurs').DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' // Traduction en français
+                }
+            });
+        });
+    </script>
+</body>
+</html>

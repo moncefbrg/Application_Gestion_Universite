@@ -1,7 +1,12 @@
 package com.example.demo.services.element;
-//log done
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,4 +92,19 @@ public class ElementServiceImpl implements IElementService {
             return false;
         }
     }
+
+	@Override
+	public List<Element> getElementsByModule(Module module) {
+		return elementRepository.findByModule(module);
+	}
+
+	@Override
+	public List<Element> getAllElements() {
+		return elementRepository.findAll();
+	}
+
+	@Override
+	public Optional<Element> findById(Long id) {
+		return elementRepository.findById(id);
+	}
 }
