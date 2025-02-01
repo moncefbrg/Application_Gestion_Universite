@@ -1,0 +1,23 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.example.demo.logging.services.IJournalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+
+    @Autowired
+    private IJournalService iJournalService;
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        iJournalService.enregistrerLog(
+            event.getLevel().toString(),
+            event.getFormattedMessage(),
+            event.getLoggerName()
+        );
+    }
+}

@@ -1,0 +1,77 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.example.demo.logging.services.IJournalService;
+import com.example.demo.security.entities.Utilisateur;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+
+    @Autowired
+    private IJournalService iJournalService;
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        System.out.println("DatabaseAppender: Logging event - " + event.getMessage()); // Debug
+        try {
+            Long userId = getUserIdFromContext();
+            String task = getCurrentMethodName();
+            String role = getRoleFromContext();
+
+            System.out.println("DatabaseAppender: userId=" + userId + ", task=" + task + ", role=" + role); // Debug
+
+            iJournalService.enregistrerLog(
+                event.getLevel().toString(),
+                event.getFormattedMessage(),
+                event.getLoggerName(),
+                userId,
+                task,
+                role
+            );
+        } catch (Exception e) {
+            System.err.println("Error in DatabaseAppender: " + e.getMessage()); // Debug
+            e.printStackTrace();
+        }
+    }
+
+    private Long getUserIdFromContext() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((Utilisateur) principal).getId();
+            }
+        }
+        return -1L; // Valeur par défaut pour un utilisateur non authentifié
+    }
+
+    private String getRoleFromContext() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((UserDetails) principal).getAuthorities().iterator().next().getAuthority();
+            }
+        }
+        return "ANONYMOUS"; // Rôle par défaut pour un utilisateur non authentifié
+    }
+
+    private String getCurrentMethodName() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        // Le premier élément (index 0) est getStackTrace(), le deuxième (index 1) est getCurrentMethodName()
+        // Le troisième élément (index 2) est la méthode qui a appelé getCurrentMethodName()
+        if (stackTrace.length > 2) {
+            return stackTrace[2].getMethodName(); // Récupérer le nom de la méthode
+        }
+        return "Unknown"; // Si la pile d'exécution est trop courte
+    }
+
+ 
+}

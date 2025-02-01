@@ -1,7 +1,9 @@
 package com.example.demo.services.formule;
-
+//log done
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,9 @@ public class FormuleServiceimpl implements IFormuleService{
 	private IFormule iFormule;
 	@Autowired
 	private INiveau iNiveau;
+	
+	private static final Logger logger=LoggerFactory.getLogger(FormuleServiceimpl.class);
+
 	@Override @Transactional
 	public Formule creerFormule(Long id, String nom, String expression, List<String> param,Niveau niveau) {
 		// Vérifier si une Formule avec le même ID existe déjà
@@ -35,6 +40,7 @@ public class FormuleServiceimpl implements IFormuleService{
                 .parametres(param)
                 .niveau(niveau)
                 .build();
+        logger.info("Creation de formule : "+id+","+expression+",pour niv : "+niveau.getAlias());
 
         // Sauvegarder la Formule dans la base de données
         return iFormule.save(formule);
@@ -51,9 +57,12 @@ public class FormuleServiceimpl implements IFormuleService{
         if(!(nouveauNom==null)) {formule.setNom(nouveauNom);}
         if(!(nouvelleExpression==null)) {formule.setExpression(nouvelleExpression);}
         if(!(nParam==null)) {formule.setParametres(nParam);}
+        
+        logger.info("Modification de formule : "+id+"avec "+nouvelleExpression);
 
         // Sauvegarder les modifications
         return iFormule.save(formule);
+
 	}
 
 	@Override @Transactional
@@ -62,6 +71,8 @@ public class FormuleServiceimpl implements IFormuleService{
         if (iFormule.existsById(id)) {
             // Supprimer la Formule
         	iFormule.deleteById(id);
+            logger.info("Supression de formule : "+id);
+
             return true;
         } else {
             // Retourner false si la formule n'existe pas

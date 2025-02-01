@@ -1,15 +1,19 @@
 package com.example.demo.services.fichierexcel;
-
+//log done
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.entities.Module;
 import com.example.demo.entities.ResultatElement;
 import com.example.demo.entities.Classe;
+import com.example.demo.entities.Deliberation;
 import com.example.demo.entities.Element;
 import com.example.demo.entities.Enseignant;
 import com.example.demo.entities.Etudiant;
@@ -22,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,6 +43,8 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
 	private IClasse iClasse;
 	@Autowired
 	private IResultatElement iResultatElement;
+	
+	private static final Logger logger=LoggerFactory.getLogger(FichierExcelServiceimpl.class);
 
 	@Override
 	public File creationFichierNoteExcel(String classe, String session, String module, String path) throws IOException {
@@ -209,7 +216,7 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
 	    } finally {
 	        workbook.close();
 	    }
-
+	    logger.info("Creation fichier note"+classe+","+session+","+module);
 	    return file;
 	}
 	
@@ -426,8 +433,8 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
         return true; // Si toutes les notes sont valides
     }
     
-    @Override
-    public File creationFichierDeliberation(String path, String dateDeliberation, String classe) throws IOException {
+    @Override @Transactional
+    public File creationFichierDeliberation(String path, Date dateDeliberation, String classe) throws IOException {
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("Délibération");
 
@@ -570,13 +577,20 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
         for (int l = 0; l < modules.size(); l++) { // parcours module
             List<Element> elements = modules.get(l).getElements();
             
+
             // Parcours des éléments du module
             for (int k = 0; k < elements.size(); k++) { 
                 Optional<ResultatElement> resultatOpt = iResultatElement.findByElementAndSessionAndEtudiant(elements.get(k), "Rattrapage", etudiants.get(i));
-                
+                Deliberation deliberation=new Deliberation();
+                deliberation.setDateDeliberation(dateDeliberation);
                 if (!resultatOpt.isPresent()) {
                     // Si aucun résultat en Rattrapage, récupérer en session Normale
                     resultatOpt = iResultatElement.findByElementAndSessionAndEtudiant(elements.get(k), "Normale", etudiants.get(i));
+                  
+                    	ResultatElement r=resultatOpt.get();
+                    	r.setDeliberation(deliberation);
+                    	iResultatElement.save(r);
+              
                 }
 
                 // Si un résultat est trouvé, récupérer la note, sinon mettre une valeur par défaut
@@ -584,8 +598,15 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
                     note = resultatOpt.get().getNote();
                     createCell(row, cellIndex1++, note != null ? note : "N/A", dataStyle);
                     moyennes.add(note);
+                    
+                    ResultatElement r=resultatOpt.get();
+                	r.setDeliberation(deliberation);
+                	iResultatElement.save(r);
                 } else {
                     createCell(row, cellIndex1++, "N/A", dataStyle); // Afficher N/A si aucune note
+                    ResultatElement r=resultatOpt.get();
+                	r.setDeliberation(deliberation);
+                	iResultatElement.save(r);
                 }
                 
             }
@@ -641,6 +662,7 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
     } finally {
         workbook.close();
     }
+    logger.info("Creation fichier deliberation"+classe+" avec la date "+dateDeliberation);
 
     return file;
 }
@@ -904,5 +926,153 @@ public class FichierExcelServiceimpl implements IFichierExcelService {
         }
         
         return columnLetter.toString();
+    }
+    @Override
+    @Transactional
+    public void mettreAJourNotesDepuisFichierExcelDeliberation(String cheminFichierExcel, String classe, Date dateDeliberationAttendue) throws IOException {
+        // Récupérer la classe et ses étudiants
+        Optional<Classe> classeOpt = iClasse.findByNom(classe);
+        if (!classeOpt.isPresent()) {
+            throw new IllegalArgumentException("Classe non trouvée : " + classe);
+        }
+        Classe classeEntity = classeOpt.get();
+        List<Etudiant> etudiants = classeEntity.getEtudiants();
+        List<Module> modules = classeEntity.getNiveau().getModules();
+
+        // Ouvrir le fichier Excel
+        FileInputStream fileInputStream = new FileInputStream(new File(cheminFichierExcel));
+        try (Workbook workbook = new XSSFWorkbook(fileInputStream)) {
+			Sheet sheet = workbook.getSheetAt(0); // Supposons que les données sont dans la première feuille
+
+			// Vérifier que les enseignants sont bien associés à leurs modules
+			for (int i = 0; i < modules.size(); i++) {
+			    Module module = modules.get(i);
+			    Enseignant enseignant = module.getEnseignant();
+			    if (enseignant == null) {
+			        throw new IllegalStateException("Aucun enseignant associé au module : " + module.getNom());
+			    }
+			    System.out.println("Vérification : Enseignant " + enseignant.getNom() + " est bien associé au module " + module.getNom());
+			}
+
+			// Vérifier que la classe contient bien la liste des étudiants
+			if (etudiants.isEmpty()) {
+			    throw new IllegalStateException("Aucun étudiant trouvé dans la classe : " + classe);
+			}
+			System.out.println("Vérification : La classe " + classe + " contient " + etudiants.size() + " étudiants.");
+
+			// Vérifier la date de délibération dans le fichier Excel
+			Row headerRow = sheet.getRow(0);
+			Cell dateDeliberationCell = headerRow.getCell(3); // Supposons que la date de délibération est dans la 4ème colonne
+			if (dateDeliberationCell == null || dateDeliberationCell.getCellType() != CellType.NUMERIC) {
+			    throw new IllegalStateException("Date de délibération manquante ou invalide dans le fichier Excel.");
+			}
+			Date dateDeliberationFichier = dateDeliberationCell.getDateCellValue();
+			if (!dateDeliberationFichier.equals(dateDeliberationAttendue)) {
+			    throw new IllegalStateException("La date de délibération dans le fichier Excel ne correspond pas à celle attendue.");
+			}
+			System.out.println("Vérification : La date de délibération dans le fichier Excel est correcte.");
+
+			// Vérifier les noms des éléments par rapport aux modules
+			Row elementHeaderRow = sheet.getRow(5); // Supposons que les noms des éléments sont dans la ligne 6
+			for (int moduleIndex = 0; moduleIndex < modules.size(); moduleIndex++) {
+			    Module module = modules.get(moduleIndex);
+			    List<Element> elements = module.getElements();
+
+			    // Vérifier les noms des éléments dans le fichier Excel
+			    for (int elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
+			        Cell elementCell = elementHeaderRow.getCell(4 + moduleIndex * 4 + elementIndex); // Calcul de la colonne
+			        if (elementCell == null || elementCell.getCellType() != CellType.STRING) {
+			            throw new IllegalStateException("Nom d'élément manquant ou invalide dans le fichier Excel pour le module " + module.getNom());
+			        }
+
+			        String nomElementFichier = elementCell.getStringCellValue();
+			        String nomElementAttendu = elements.get(elementIndex).getNom();
+			        if (!nomElementFichier.equals(nomElementAttendu)) {
+			            throw new IllegalStateException("Le nom de l'élément dans le fichier Excel ne correspond pas à celui attendu pour le module " + module.getNom());
+			        }
+			    }
+			}
+			System.out.println("Vérification : Les noms des éléments dans le fichier Excel correspondent à ceux des modules.");
+
+			// Parcourir les lignes du fichier Excel (à partir de la ligne 6, où les données des étudiants commencent)
+			for (int rowIndex = 6; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+			    Row row = sheet.getRow(rowIndex);
+			    if (row == null) continue; // Ignorer les lignes vides
+
+			    // Récupérer l'ID de l'étudiant (première colonne)
+			    long idEtudiant = Long.parseLong(row.getCell(0).getStringCellValue());
+
+			    // Trouver l'étudiant correspondant dans la classe
+			    Optional<Etudiant> etudiantOpt = etudiants.stream()
+			        .filter(e -> e.getId() == idEtudiant)
+			        .findFirst();
+
+			    if (!etudiantOpt.isPresent()) {
+			        throw new IllegalStateException("Étudiant non trouvé dans la classe : ID = " + idEtudiant);
+			    }
+			    Etudiant etudiant = etudiantOpt.get();
+
+			    // Récupérer les notes modifiées pour chaque module
+			    int cellIndex = 4; // Les notes commencent à la colonne 4
+			    for (int moduleIndex = 0; moduleIndex < modules.size(); moduleIndex++) {
+			        Module module = modules.get(moduleIndex);
+			        List<Element> elements = module.getElements();
+
+			        // Parcourir les éléments du module
+			        for (int elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
+			            Cell noteCell = row.getCell(cellIndex++);
+			            if (noteCell == null || noteCell.getCellType() == CellType.BLANK) {
+			                continue; // Ignorer les cellules vides
+			            }
+
+			            // Récupérer la note modifiée
+			            double noteModifiee = noteCell.getNumericCellValue();
+			            if(noteModifiee < 0 || noteModifiee > 20) {
+			            	throw new IllegalStateException("Les notes doivent etre entre 0 et 20");
+			            }
+
+			            // Trouver le résultat correspondant (en session normale ou rattrapage)
+			            Optional<ResultatElement> resultatOpt = iResultatElement.findByElementAndSessionAndEtudiant(
+			                elements.get(elementIndex), "Rattrapage", etudiant
+			            );
+
+			            if (!resultatOpt.isPresent()) {
+			                resultatOpt = iResultatElement.findByElementAndSessionAndEtudiant(
+			                    elements.get(elementIndex), "Normale", etudiant
+			                );
+			            }
+
+			            // Mettre à jour la note finale dans la délibération
+			            if (resultatOpt.isPresent()) {
+			                ResultatElement resultat = resultatOpt.get();
+			                Deliberation deliberation = resultat.getDeliberation();
+
+			                if (deliberation == null) {
+			                    deliberation = new Deliberation();
+			                    resultat.setDeliberation(deliberation);
+			                }
+
+			                deliberation.setNoteFinale(noteModifiee); // Mettre à jour la note finale
+			                iResultatElement.save(resultat); // Sauvegarder les modifications
+			                System.out.println("Note mise à jour pour l'étudiant " + etudiant.getNom() + 
+			                                  " dans l'élément " + elements.get(elementIndex).getNom() + 
+			                                  " : " + noteModifiee);
+			            }
+			        }
+
+			        // Ignorer les colonnes "Moyenne" et "Validation" (2 colonnes par module)
+			        cellIndex += 2;
+			    }
+			}
+
+			// Fermer le fichier Excel
+			workbook.close();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        fileInputStream.close();
+	    logger.info("Mise a jourdu fichier deliberation "+classe+","+"date deliberation :"+dateDeliberationAttendue);
+
     }
 }

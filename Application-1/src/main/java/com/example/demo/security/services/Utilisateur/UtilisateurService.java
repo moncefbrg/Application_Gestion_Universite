@@ -1,9 +1,11 @@
 package com.example.demo.security.services.Utilisateur;
-
+//log done
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +26,7 @@ import com.example.demo.security.entities.Utilisateur;
 public class UtilisateurService implements UserDetailsService {
 	@Autowired
 	private IUtilisateur iutilisateur;
-	
+    private static final Logger logger = LoggerFactory.getLogger(UtilisateurService.class);
 	@Autowired
 	@Lazy
 	private PasswordEncoder passwordEncoder; //pour encoder le mdp avant de l'enregistrer dans la bd
@@ -62,9 +64,11 @@ public class UtilisateurService implements UserDetailsService {
 		utilisateur.setUsername(username);
 		utilisateur.setPassword(encodedPassword);
 		utilisateur.setRoles(new HashSet<>(roles));
+	    logger.info("l'utilisateur"+id+","+username+"a ete cree");
 		
 		//enregistrer dans la bd
 		return iutilisateur.save(utilisateur);
+		
 		
 	}
 	
@@ -85,6 +89,8 @@ public class UtilisateurService implements UserDetailsService {
 		String encodedPassword=passwordEncoder.encode(nouveauMotDePasse);
 		utilisateur.setPassword(encodedPassword);
 		iutilisateur.save(utilisateur);
+	    logger.info("l'utilisateur"+username+"a change son mot de passe");
+
 	}
 	
 	@Transactional
@@ -94,10 +100,19 @@ public class UtilisateurService implements UserDetailsService {
 		
 		utilisateur.setEnabled(enabled);
 		iutilisateur.save(utilisateur);
+		if(enabled==true) {
+		    logger.info("l'utilisateur"+username+"a ete active");
+
+		}else {
+		    logger.info("l'utilisateur"+username+"a ete desactive");
+
+		}
 	
 	}
 	
     public boolean existsByUsername(String username) {
+	    logger.info("chercher l'utilisateur"+username);
+
         return iutilisateur.existsByUsername(username);
     }
 

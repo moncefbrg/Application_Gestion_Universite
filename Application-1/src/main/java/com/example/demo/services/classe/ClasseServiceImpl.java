@@ -1,9 +1,11 @@
 package com.example.demo.services.classe;
-
+//log done
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +24,13 @@ public class ClasseServiceImpl implements IClasseService{
 	private INiveau iNiveau;
 	@Autowired
 	private IEtudiant iEtudiant;
-	@Override
+    private static final Logger logger = LoggerFactory.getLogger(ClasseServiceImpl.class);
+
+	@Override @Transactional
 	public Classe creerClasse(String nom) {
 	    // Vérifier si une classe avec ce nom existe déjà
 	    if (iClasse.findByNom(nom).isPresent()) {
-	        throw new RuntimeException("Une classe avec le nom '" + nom + "' existe déjà.");
+	        throw new RuntimeException("Une classe avec le nom " + nom + "  existe déjà.");
 	    }
 
 	    // Créer une nouvelle classe
@@ -35,6 +39,7 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Sauvegarder la classe
 	    iClasse.save(classe);
+	    logger.info("la classe "+nom+" a ete cree");
 
 	    // Vérifier si la classe a été correctement sauvegardée
 	    return classe;
@@ -43,6 +48,8 @@ public class ClasseServiceImpl implements IClasseService{
 	@Override @Transactional
 	public boolean supprimerClasse(String nom) {
 		iClasse.delete(iClasse.findByNom(nom).get());
+	    logger.info("la classe "+nom+" a ete supprimee");
+
 		return true;
 	};
 	@Override
@@ -70,6 +77,8 @@ public class ClasseServiceImpl implements IClasseService{
 	    // Modifier le nom de la classe
 	    Classe classe = classeOptional.get();
 	    classe.setNom(nouveauNom);
+	    logger.info("la classe "+nom+" a devenu "+nouveauNom);
+
 
 	    // Pas besoin d'appeler iClasse.save(classe) car @Transactional le gère automatiquement
 
@@ -113,6 +122,8 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Sauvegarder la classe (automatiquement géré par @Transactional)
 	    iClasse.save(classe);
+	    logger.info("l'etudiant "+id+" a ete associe a la classe "+nom);
+
 
 	    return true; // Retourne true si l'ajout est réussi
 	}
@@ -154,6 +165,8 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Sauvegarder la classe (automatiquement géré par @Transactional)
 	    iClasse.save(classe);
+	    logger.info("l'etudiant "+id+" a ete suprime de la classe"+nom);
+
 
 	    return true; // Retourne true si la suppression est réussie
 	}
@@ -176,6 +189,7 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Récupérer la liste des étudiants
 	    List<Etudiant> etudiants = classe.getEtudiants();
+	    logger.info("Consultation de la classe "+nom);
 
 	    // Retourner la liste des étudiants (peut être vide mais pas null)
 	    return etudiants != null ? etudiants : Collections.emptyList();
@@ -210,6 +224,8 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Sauvegarde des modifications
 	    iClasse.save(classeBD);
+	    logger.info("la classe "+classe.getNom()+" a ete associe au niveau "+niveau.getAlias());
+
 
 	    return true;
 	}
@@ -242,6 +258,8 @@ public class ClasseServiceImpl implements IClasseService{
 
 	    // Sauvegarde des modifications
 	    iClasse.save(classeBD);
+	    logger.info("la classe "+classe.getNom()+" a ete separer du niveau "+niveau.getAlias());
+
 
 	    return true;
 	}

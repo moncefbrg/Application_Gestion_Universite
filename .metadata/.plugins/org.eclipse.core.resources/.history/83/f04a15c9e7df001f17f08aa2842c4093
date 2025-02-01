@@ -1,0 +1,88 @@
+package com.example.demo.services.element;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.entities.Element;
+import com.example.demo.entities.Module;
+import com.example.demo.repositories.IElement;
+import com.example.demo.repositories.IModule;
+import com.example.demo.services.classe.ClasseServiceImpl;
+
+@Service
+public class ElementServiceImpl implements IElementService {
+
+    @Autowired
+    private IElement elementRepository;
+    @Autowired
+    private IModule iModule;
+    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(ClasseServiceImpl.class);
+    @Override
+    @Transactional
+    public Element creerElement(Long id, String nom,Module module) {
+        // Vérifier si un élément avec le même ID existe déjà
+        if (elementRepository.existsById(id)) {
+            throw new RuntimeException("Un élément avec l'ID " + id + " existe déjà.");
+        }
+
+        // Vérifier si un élément avec le même nom existe déjà
+        if (elementRepository.existsByNom(nom)) {
+            throw new RuntimeException("Un élément avec le nom " + nom + " existe déjà.");
+        }
+        if (iModule.findById(module.getId()).isEmpty()) {
+	        throw new IllegalArgumentException("Le module avec le nom "+module.getNom()+" n'existe pas");
+	    }
+
+        // Utilisation du Builder pour créer un nouvel élément
+        Element element = Element.builder()
+                .id(id)
+                .nom(nom)
+                .module(module)
+                .build();
+
+        // Sauvegarder l'élément dans la base de données
+        return elementRepository.save(element);
+    }
+
+    @Override
+    @Transactional
+    public Element modifierElement(Long id, String ancienNom, String nouveauNom) {
+        // Récupérer l'élément existant par son ID
+        Element element = elementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Élément non trouvé avec l'ID : " + id));
+        
+        // Vérifier si l'ancien nom correspond
+        if (!element.getNom().equals(ancienNom)) {
+            throw new RuntimeException("Le nom de l'élément ne correspond pas à l'ancien nom fourni.");
+        }
+        
+        // Utilisation du Builder pour mettre à jour l'élément
+        Element elementModifie = Element.builder()
+                .id(element.getId()) // Conserver le même ID
+                .nom(nouveauNom) // Nouveau nom
+                .module(element.getModule()) // Conserver le module existant
+                .ResultatsElements(element.getResultatsElements()) // Conserver les résultats existants
+                .build();
+        
+        // Sauvegarder les modifications
+        return elementRepository.save(elementModifie);
+    }
+
+    @Override
+    @Transactional
+    public boolean supprimerElement(Long id) {
+        // Vérifier si l'élément existe
+        if (elementRepository.existsById(id)) {
+            // Supprimer l'élément
+            elementRepository.deleteById(id);
+            return true;
+        } else {
+            // Retourner false si l'élément n'existe pas
+            return false;
+        }
+    }
+}

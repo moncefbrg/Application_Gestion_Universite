@@ -1,0 +1,25 @@
+<configuration>
+
+    <!-- Définir l'appender pour la base de données -->
+    <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <dataSource class="org.apache.tomcat.jdbc.pool.DataSource">
+            <driverClassName>com.mysql.cj.jdbc.Driver</driverClassName>
+            <url>jdbc:mysql://localhost:3306/ma_base_de_donnees</url>
+            <username>ton_utilisateur</username>
+            <password>ton_mot_de_passe</password>
+        </dataSource>
+        <!-- Requête SQL pour insérer les logs -->
+        <sql>
+            <![CDATA[
+            INSERT INTO application_logs (level, logger, message, exception)
+            VALUES (%level%, %logger%, %message%, %exception%)
+            ]]>
+        </sql>
+    </appender>
+
+    <!-- Définir le niveau de log et l'appender -->
+    <root level="debug">
+        <appender-ref ref="DB"/>
+    </root>
+
+</configuration>

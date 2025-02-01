@@ -1,0 +1,6 @@
+package com.example.demo.logging.services;
+
+public interface IJournalService {
+	public void enregistrerLog(String logLevel, String message, String loggerName , String task, String role);
+
+}

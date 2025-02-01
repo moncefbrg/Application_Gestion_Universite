@@ -1,0 +1,24 @@
+package com.example.demo.logging.aspect;
+
+import com.example.demo.logging.services.LogService;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Autowired
+    private LogService logService;
+
+
+    @After("execution(* com.example.demo.*.*.*(..))")
+    public void logAfter(JoinPoint joinPoint) {
+        String method = joinPoint.getSignature().getName();
+        logService.saveLog(method);
+    }
+}

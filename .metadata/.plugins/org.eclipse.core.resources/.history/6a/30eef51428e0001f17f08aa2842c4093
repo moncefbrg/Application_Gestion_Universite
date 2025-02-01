@@ -1,0 +1,23 @@
+package com.example.demo.logging.services;
+
+import com.example.demo.logging.entities.Journal;
+import com.example.demo.logging.repositories.IJournal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+public class JournalServiceimpl implements IJournalService{
+
+    @Autowired
+    private IJournal iJournal;
+
+    public void log(String level, String message) {
+        Journal logEntry = new Journal();
+        logEntry.setLevel(level);
+        logEntry.setMessage(message);
+        logEntry.setTimestamp(LocalDateTime.now());
+        iJournal.save(logEntry);
+    }
+}

@@ -1,9 +1,11 @@
 package com.example.demo.services.niveau;
-
+//log done
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ public class NiveauServiceImpl implements INiveauService{
 	private ISeuil iSeuil;
 	@Autowired
 	private IModule iModule;
+	
+	private static final Logger logger=LoggerFactory.getLogger(NiveauServiceImpl.class);
 	@Override
 	public boolean checkExistanceNiveau(Long id) {
 		if(!(iNiveau.findById(id).isEmpty())) {
@@ -74,6 +78,7 @@ public class NiveauServiceImpl implements INiveauService{
 		 * f.getNom(), f.getExpression(), f.getParametres()); Formule
 		 * f1=iFormule.findById(f.getId()).get(); iFormule.save(f1); }
 		 */
+	    logger.info("Creation du niveau"+id+","+ nom+","+ alias+","+ niveauSuivant.getAlias());
 	    return niveau;
 	}
 	@Override
@@ -150,6 +155,7 @@ public class NiveauServiceImpl implements INiveauService{
 
 	    // Sauvegarder le niveau (automatiquement géré par @Transactional)
 	    iNiveau.save(niveau);
+	    logger.info("Modification du niveau"+id);
 
 	    return true; // Retourne true si la modification est réussie
 	}
@@ -178,6 +184,7 @@ public class NiveauServiceImpl implements INiveauService{
 
 	    // Supprimer le niveau
 	    iNiveau.delete(niveau);
+	    logger.info("Modification du niveau"+nom);
 
 	    return true; // Retourne true si la suppression est réussie
 	}
@@ -246,6 +253,8 @@ public class NiveauServiceImpl implements INiveauService{
 	    // Sauvegarde des modifications
 	    iNiveau.save(niveauBD);
 	    iSeuil.save(seuilBD);
+	    logger.info("Association du niveau"+niveau.getAlias()+" au seuil "+seuil.getId());
+
 
 	    return true;
 	}

@@ -1,0 +1,16 @@
+package com.example.demo.logging.config;
+
+import com.example.demo.logging.aspect.LoggingAspect;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
+@Configuration
+@EnableAspectJAutoProxy
+public class LoggingConfig {
+
+    @Bean
+    public LoggingAspect loggingAspect() {
+        return new LoggingAspect();
+    }
+}

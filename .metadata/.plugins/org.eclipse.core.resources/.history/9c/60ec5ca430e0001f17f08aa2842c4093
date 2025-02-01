@@ -1,0 +1,38 @@
+package com.example.demo.logging.aspect;
+
+import com.example.demo.logging.services.LogService;
+
+import java.util.Arrays;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Autowired
+    private LogService logService;
+
+
+    @After("execution(* com.example.demo.services.*.*.*.*(..)) || execution(* com.example.demo.security.services.utilisateur.UtilisateurService.*(..))")    
+    public void logAfter(JoinPoint joinPoint) {
+    	// Récupère la signature de la méthode
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        String methodName = signature.getMethod().getName(); // Nom de la méthode
+        Class<?>[] parameterTypes = signature.getMethod().getParameterTypes(); // Types des paramètres
+        Object[] args = joinPoint.getArgs(); // Valeurs des paramètres
+
+        // Affiche les informations
+        System.out.println("Méthode exécutée : " + methodName);
+        System.out.println("Types des paramètres : " + Arrays.toString(parameterTypes));
+        System.out.println("Valeurs des paramètres : " + Arrays.toString(args));
+    
+        String message = methodName+ Arrays.toString(args);
+        logService.saveLog(message);
+    }
+}

@@ -1,9 +1,11 @@
 package com.example.demo.services.collectenotes;
-
+//log done
 import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,7 @@ public class ServiceCollecteNotesImpl implements IServiceCollecteNotes {
 	private IClasse classeRepository;
 	@Autowired
 	private IFichierExcelService iFichierExcelService;
+    private static final Logger logger = LoggerFactory.getLogger(ServiceCollecteNotesImpl.class);
 	@Override
 	public File genererFichierCollecteNotes(String session, String classe, String module,String path) throws Exception {
 		File file=iFichierExcelService.creationFichierNoteExcel(classe, session, module, path);
@@ -60,7 +63,7 @@ public class ServiceCollecteNotesImpl implements IServiceCollecteNotes {
 	        .filter(resultat -> resultat.getEtudiant().getId().equals(idEtudiant))
 	        .map(ResultatElement::getNote) // Récupérer les notes
 	        .collect(Collectors.toList());
-
+	    logger.info("Etudiant"+idEtudiant);
 	    return notes;
 	}
 
@@ -108,6 +111,7 @@ public class ServiceCollecteNotesImpl implements IServiceCollecteNotes {
 	    List<Long> idsEtudiants=classe.getEtudiants().stream()
 	            .map(Etudiant::getId)
 	            .collect(Collectors.toList());
+	    logger.info("Recuperation des etudiants de la classe"+nomClasse);
 
 	    return idsEtudiants;
 	}

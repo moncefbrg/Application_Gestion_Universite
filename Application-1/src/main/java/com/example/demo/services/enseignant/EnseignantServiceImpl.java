@@ -1,9 +1,11 @@
 package com.example.demo.services.enseignant;
-
+//log done
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class EnseignantServiceImpl implements IEnseignantService {
 	IEnseignant iEnseignant;
 	@Autowired
 	IModule iModule;
+    private static final Logger logger = LoggerFactory.getLogger(EnseignantServiceImpl.class);
 	@Override
 	@Transactional
 	public boolean creeEnseignant(Long id, String nom, String prenom, String cni, List<Module> modules) {
@@ -71,6 +74,7 @@ public class EnseignantServiceImpl implements IEnseignantService {
 
 	    // Sauvegarder l'enseignant
 	    iEnseignant.save(enseignant);
+	    logger.info("creation de l'enseignant"+id+","+nom+","+prenom+","+cni);
 
 	    return true; // Retourne true si la création est réussie
 	}
@@ -91,6 +95,8 @@ public class EnseignantServiceImpl implements IEnseignantService {
 
 	    // Récupérer l'enseignant à supprimer
 	    Enseignant enseignant = enseignantOptional.get();
+	    logger.info("supression de l'enseignant"+id);
+
 
 	    // Supprimer l'enseignant
 	    iEnseignant.delete(enseignant);
@@ -150,6 +156,8 @@ public class EnseignantServiceImpl implements IEnseignantService {
 
 	    // Sauvegarder l'enseignant (automatiquement géré par @Transactional)
 	    iEnseignant.save(enseignant);
+	    logger.info("modification de l'enseignant"+id+"avec :"+nom+","+prenom+","+cni);
+
 
 	    return true; // Retourne true si la modification est réussie
 	}

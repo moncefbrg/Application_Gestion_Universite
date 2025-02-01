@@ -1,0 +1,63 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.example.demo.logging.services.IJournalService;
+import com.example.demo.security.entities.Utilisateur;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+
+    @Autowired
+    private IJournalService iJournalService;
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        // Récupérer les informations supplémentaires (userId, task, role)
+        Long userId = getUserIdFromContext(); // À implémenter
+        String task = getTaskFromContext();   // À implémenter
+        String role = getRoleFromContext();   // À implémenter
+
+        iJournalService.enregistrerLog(
+            event.getLevel().toString(),
+            event.getFormattedMessage(),
+            event.getLoggerName(),
+            userId,
+            task,
+            role
+        );
+    }
+
+    
+    private String getTaskFromContext() {
+        // Implémentez la logique pour récupérer la tâche
+        return "Tâche XYZ"; // Exemple : Nom de la tâche
+    }
+
+    
+    private Long getUserIdFromContext() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            // Récupérer l'ID de l'utilisateur à partir de userDetails
+            // Exemple : Si votre UserDetails implémente une méthode getId()
+            return ((Utilisateur) userDetails).getId(); // Remplacez par votre logique
+        }
+        return null; // ou une valeur par défaut
+    }
+
+    private String getRoleFromContext() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            // Récupérer le rôle de l'utilisateur
+            return userDetails.getAuthorities().iterator().next().getAuthority();
+        }
+        return null; // ou une valeur par défaut
+    }
+}

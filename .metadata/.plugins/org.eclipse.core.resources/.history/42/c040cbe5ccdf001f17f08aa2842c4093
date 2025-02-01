@@ -1,0 +1,8 @@
+<configuration>
+    <appender name="DATABASE" class="com.example.demo.logging.DatabaseAppender">
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="DATABASE" />
+    </root>
+</configuration>

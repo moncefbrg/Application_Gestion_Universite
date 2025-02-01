@@ -27,10 +27,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 
-
+@EnableScheduling
 @SpringBootApplication
 public class Application1Application implements CommandLineRunner {
 
@@ -82,6 +83,8 @@ public class Application1Application implements CommandLineRunner {
 			  //String date="29/01/2025";
 			  //iEtudiantService.inscrire(file);
 			 // iFichierExcelService.creationFichierDeliberation(path,date, "M11");
+			  //iEtudiantService.modifierEtudiant((long)1, null, null, "LUCY", null);
+			  //iClasseService.consulterClasse("M11");
 	  }; }
 
 	@Override

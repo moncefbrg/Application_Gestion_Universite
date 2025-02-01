@@ -1,0 +1,14 @@
+<configuration>
+    <!-- Appender qui écrit dans la console -->
+    <appender name="DATABASE" class="com.example.demo.logging.DatabaseAppender">
+    </appender>
+
+    <root level="INFO">
+        <!-- Logger racine, qui envoie les logs à l'appender database -->
+
+        <appender-ref ref="DATABASE" />
+    </root>
+    <root level="error">
+    <appender-ref ref="console" />
+</root>
+</configuration>

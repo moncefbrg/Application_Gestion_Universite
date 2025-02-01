@@ -1,0 +1,38 @@
+package com.example.demo.logging.aspect;
+
+import com.example.demo.logging.services.IJournalService;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Autowired
+    private IJournalService loggingService;
+
+    // Pointcut pour intercepter toutes les méthodes dans le package "com.example.demo" SAUF celles de "IJournalService" et "LoggingAspect"
+    @Before("execution(* com.example.demo..*(..)) && !execution(* com.example.demo.logging.services.IJournalService.*(..)) && !execution(* com.example.demo.logging.aspect.LoggingAspect.*(..))")
+    public void logBefore(JoinPoint joinPoint) {
+        String message = "Entering method: " + joinPoint.getSignature().getName();
+        loggingService.log("INFO", message);
+    }
+
+    @AfterReturning(pointcut = "execution(* com.example.demo..*(..)) && !execution(* com.example.demo.logging.services.IJournalService.*(..)) && !execution(* com.example.demo.logging.aspect.LoggingAspect.*(..))", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+        String message = "Exiting method: " + joinPoint.getSignature().getName() + " with result: " + result;
+        loggingService.log("INFO", message);
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.example.demo..*(..)) && !execution(* com.example.demo.logging.services.IJournalService.*(..)) && !execution(* com.example.demo.logging.aspect.LoggingAspect.*(..))", throwing = "error")
+    public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
+        String message = "Exception in method: " + joinPoint.getSignature().getName() + " with cause: " + error.getMessage();
+        loggingService.log("ERROR", message);
+    }
+}

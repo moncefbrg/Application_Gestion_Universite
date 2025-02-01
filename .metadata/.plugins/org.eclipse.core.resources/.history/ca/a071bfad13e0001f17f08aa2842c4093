@@ -1,0 +1,35 @@
+package com.example.demo.logging.services;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.logging.entities.Journal;
+import com.example.demo.logging.repositories.IJournal;
+
+
+public class JournalServiceimpl implements IJournalService{
+	@Autowired
+	private IJournal iJournal;
+	@Override
+	public void enregistrerLog(String logLevel, String message, String loggerName, Long userId, String task, String role) {
+	    System.out.println("JournalServiceimpl: Saving log - " + message); // Debug
+	    Journal journal = new Journal();
+	    journal.setLogLevel(logLevel);
+	    journal.setMessage(message);
+	    journal.setLoggerName(loggerName);
+	    journal.setTimestamp(LocalDateTime.now());
+	    journal.setUserId(userId);
+	    journal.setTask(task);
+	    journal.setRole(role);
+
+	    try {
+	        iJournal.save(journal);
+	        System.out.println("JournalServiceimpl: Log saved successfully"); // Debug
+	    } catch (Exception e) {
+	        System.err.println("Error saving log: " + e.getMessage()); // Debug
+	        e.printStackTrace();
+	    }
+	}
+}

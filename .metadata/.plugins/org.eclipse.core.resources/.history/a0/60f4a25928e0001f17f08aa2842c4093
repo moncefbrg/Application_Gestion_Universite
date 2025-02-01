@@ -1,0 +1,21 @@
+package com.example.demo.logging.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LogService {
+
+    @Autowired
+    private LogRepository logRepository;
+
+    public void saveLog(String logger, String level, String message, String exception) {
+        Log log = new Log();
+        log.setLogDate(LocalDateTime.now());
+        log.setLogger(logger);
+        log.setLevel(level);
+        log.setMessage(message);
+        log.setException(exception);
+        logRepository.save(log);
+    }
+}

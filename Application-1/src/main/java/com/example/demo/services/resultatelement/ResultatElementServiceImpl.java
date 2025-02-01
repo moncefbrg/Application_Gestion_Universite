@@ -1,7 +1,9 @@
 package com.example.demo.services.resultatelement;
 
+//log done
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ public class ResultatElementServiceImpl implements IResultatElementService {
 	private IEtudiant iEtudiant;
 	@Autowired
 	private IResultatElement iResultatElement;
+	
+	private static final Logger logger=LoggerFactory.getLogger(ResultatElementServiceImpl.class);
 	@Override
 	@Transactional
 	public boolean associerNoteElementEtudiant(Double note, Element element, Etudiant etudiant,String session) throws Exception {
@@ -67,6 +71,7 @@ public class ResultatElementServiceImpl implements IResultatElementService {
 	    r.setEtudiant(etudiant);
 	    r.setSession(session);
 	    iResultatElement.save(r);
+	    logger.info("Association note : "+note+"element "+ element.getNom()+"a l'etudiant:"+ etudiant.getId()+"pour la session"+session);
 
 	    return true;
 	}
@@ -118,6 +123,8 @@ public class ResultatElementServiceImpl implements IResultatElementService {
 	    // Modification de la note
 	    resultat.setNote(nouvelleNote);
 	    iResultatElement.save(resultat);
+	    logger.info("Modification note : "+nouvelleNote+"element "+ element.getNom()+"a l'etudiant:"+ etudiant.getId()+"pour l'id resultat"+resultatId);
+
 
 	    return true;
 	}

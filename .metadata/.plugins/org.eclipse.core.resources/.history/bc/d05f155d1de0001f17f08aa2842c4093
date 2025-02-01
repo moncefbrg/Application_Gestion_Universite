@@ -1,0 +1,24 @@
+<configuration>
+
+    <!-- Appender qui écrit dans la base de données -->
+    <appender name="DATABASE" class="com.example.demo.logging.DatabaseAppender">
+    </appender>
+
+    <!-- Appender pour afficher les logs dans la console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Définition du niveau de log pour la racine -->
+    <root level="INFO">
+        <appender-ref ref="DATABASE" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+    <root level="debug">
+    <appender-ref ref="DATABASE"/>
+</root>
+    
+
+</configuration>

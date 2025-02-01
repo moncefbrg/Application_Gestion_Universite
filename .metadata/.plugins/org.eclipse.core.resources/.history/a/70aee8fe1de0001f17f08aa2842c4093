@@ -1,0 +1,88 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import jakarta.annotation.PostConstruct;
+
+import com.example.demo.logging.services.IJournalService;
+import com.example.demo.security.entities.Utilisateur;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+	@Autowired
+    private IJournalService iJournalService;
+	 @PostConstruct
+	    public void init() {
+	        if (iJournalService != null) {
+	            System.out.println("IJournalService is ready to be used.");
+	        } else {
+	            System.out.println("IJournalService is still null at @PostConstruct.");
+	        }
+	    }
+	 public DatabaseAppender() {
+	        System.out.println("DatabaseAppender instantiated.");
+	    }
+    
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        System.out.println("DatabaseAppender: Logging event - " + event.getMessage());
+        try {
+            Long userId = getUserIdFromContext();
+            String task = getCurrentMethodName();
+            String role = getRoleFromContext();
+
+            System.out.println("DatabaseAppender: userId=" + userId + ", task=" + task + ", role=" + role);
+
+            iJournalService.enregistrerLog(
+                event.getLevel().toString(),
+                event.getFormattedMessage(),
+                event.getLoggerName(),
+                userId,
+                task,
+                role
+            );
+        } catch (Exception e) {
+            System.err.println("Error in DatabaseAppender: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private Long getUserIdFromContext() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((Utilisateur) principal).getId();
+            }
+        }
+        return -1L;
+    }
+
+    private String getRoleFromContext() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            Object principal = context.getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                return ((UserDetails) principal).getAuthorities().iterator().next().getAuthority();
+            }
+        }
+        return "ANONYMOUS";
+    }
+
+    private String getCurrentMethodName() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        if (stackTrace.length > 2) {
+            return stackTrace[2].getMethodName();
+        }
+        return "Unknown";
+    }
+}

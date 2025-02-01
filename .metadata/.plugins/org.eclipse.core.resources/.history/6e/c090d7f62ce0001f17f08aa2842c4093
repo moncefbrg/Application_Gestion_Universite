@@ -1,0 +1,31 @@
+package com.example.demo.logging.aspect;
+
+import com.example.demo.logging.services.LogService;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Autowired
+    private LogService logService;
+
+    @Before("execution(* com.example.controller.*.*(..))")
+    public void logBefore(JoinPoint joinPoint) {
+        String logger = joinPoint.getTarget().getClass().getName();
+        String method = joinPoint.getSignature().getName();
+        logService.saveLog(logger, "INFO", "Début de la méthode " + method, null);
+    }
+
+    @After("execution(* com.example.controller.*.*(..))")
+    public void logAfter(JoinPoint joinPoint) {
+        String logger = joinPoint.getTarget().getClass().getName();
+        String method = joinPoint.getSignature().getName();
+        logService.saveLog(logger, "INFO", "Fin de la méthode " + method, null);
+    }
+}

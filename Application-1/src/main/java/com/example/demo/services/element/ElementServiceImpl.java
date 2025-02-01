@@ -1,5 +1,7 @@
 package com.example.demo.services.element;
-
+//log done
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +18,7 @@ public class ElementServiceImpl implements IElementService {
     private IElement elementRepository;
     @Autowired
     private IModule iModule;
-
+    private static final Logger logger = LoggerFactory.getLogger(ElementServiceImpl.class);
     @Override
     @Transactional
     public Element creerElement(Long id, String nom,Module module) {
@@ -39,7 +41,7 @@ public class ElementServiceImpl implements IElementService {
                 .nom(nom)
                 .module(module)
                 .build();
-
+        logger.info("creation d'element"+element.getNom()+"pour module"+module.getNom());
         // Sauvegarder l'élément dans la base de données
         return elementRepository.save(element);
     }
@@ -65,6 +67,8 @@ public class ElementServiceImpl implements IElementService {
                 .build();
         
         // Sauvegarder les modifications
+        logger.info("Modification d'element"+ancienNom+" avec "+nouveauNom);
+
         return elementRepository.save(elementModifie);
     }
 
@@ -75,6 +79,8 @@ public class ElementServiceImpl implements IElementService {
         if (elementRepository.existsById(id)) {
             // Supprimer l'élément
             elementRepository.deleteById(id);
+            logger.info("suppression d'element"+id);
+
             return true;
         } else {
             // Retourner false si l'élément n'existe pas

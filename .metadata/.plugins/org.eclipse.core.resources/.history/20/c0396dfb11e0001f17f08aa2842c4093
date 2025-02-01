@@ -1,0 +1,71 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.example.demo.logging.services.IJournalService;
+import com.example.demo.security.entities.Utilisateur;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+
+    @Autowired
+    private IJournalService iJournalService;
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        try {
+            System.out.println("DatabaseAppender: Logging event - " + event.getMessage()); // Debug
+            Long userId = getUserIdFromContext();
+            String task = getCurrentMethodName();
+            String role = getRoleFromContext();
+
+            iJournalService.enregistrerLog(
+                event.getLevel().toString(),
+                event.getFormattedMessage(),
+                event.getLoggerName(),
+                userId,
+                task,
+                role
+            );
+            
+        } catch (Exception e) {
+            System.err.println("Error in DatabaseAppender: " + e.getMessage()); // Debug
+            e.printStackTrace();
+        }
+    }
+
+    private Long getUserIdFromContext() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            // Récupérer l'ID de l'utilisateur à partir de userDetails
+            return ((Utilisateur) userDetails).getId(); // Remplacez par votre logique
+        }
+        return null; // ou une valeur par défaut
+    }
+
+    private String getCurrentMethodName() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        // Le premier élément (index 0) est getStackTrace(), le deuxième (index 1) est getCurrentMethodName()
+        // Le troisième élément (index 2) est la méthode qui a appelé getCurrentMethodName()
+        if (stackTrace.length > 2) {
+            return stackTrace[2].getMethodName(); // Récupérer le nom de la méthode
+        }
+        return "Unknown"; // Si la pile d'exécution est trop courte
+    }
+
+    private String getRoleFromContext() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            // Récupérer le rôle de l'utilisateur
+            return userDetails.getAuthorities().iterator().next().getAuthority();
+        }
+        return null; // ou une valeur par défaut
+    }
+}

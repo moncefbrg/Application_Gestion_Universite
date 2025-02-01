@@ -1,5 +1,7 @@
 package com.example.demo.services.seuil;
-
+//log done
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,8 @@ public class SeuilServiceImpl implements ISeuilService {
 
     @Autowired
     private ISeuil seuilRepository;
+    
+	private static final Logger logger=LoggerFactory.getLogger(SeuilServiceImpl.class);
 
     @Override
     @Transactional
@@ -23,9 +27,10 @@ public class SeuilServiceImpl implements ISeuilService {
                 .XNormale(xNormale)
                 .YRattrapage(yRattrapage)
                 .build();
-
+        logger.info("Creation seuil avec id :"+id+"X: "+xNormale+" Y:"+yRattrapage);
         // Sauvegarder le seuil dans la base de données
         return seuilRepository.save(seuil);
+        
     }
 
     @Override
@@ -38,9 +43,11 @@ public class SeuilServiceImpl implements ISeuilService {
         // Mettre à jour les valeurs du seuil
         if(!(nXNormale==null)) {seuil.setXNormale(nXNormale);}
         if(!(nYRattrapage==null)) {seuil.setYRattrapage(nYRattrapage);}
+        logger.info("Modification seuil avec id :"+id+"X: "+nXNormale+" Y:"+nYRattrapage);
 
         // Sauvegarder les modifications
         return seuilRepository.save(seuil);
+
     }
 
     @Override
@@ -50,6 +57,8 @@ public class SeuilServiceImpl implements ISeuilService {
         if (seuilRepository.existsById(id)) {
             // Supprimer le seuil
             seuilRepository.deleteById(id);
+            logger.info("Supression seuil avec id :"+id);
+
             return true;
         } else {
             // Retourner false si le seuil n'existe pas

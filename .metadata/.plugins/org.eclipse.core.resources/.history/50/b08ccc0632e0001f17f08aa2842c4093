@@ -1,0 +1,23 @@
+package com.example.demo.logging.services;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.logging.entities.Log;
+import com.example.demo.logging.repositories.LogRepository;
+
+@Service
+public class LogService {
+
+    @Autowired
+    private LogRepository logRepository;
+
+    public void saveLog( String message) {
+        Log log = new Log();
+        log.setLogDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        log.setMessage(message);
+        logRepository.save(log);
+    }
+}

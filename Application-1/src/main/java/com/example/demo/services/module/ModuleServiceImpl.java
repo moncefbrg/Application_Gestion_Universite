@@ -1,8 +1,10 @@
 package com.example.demo.services.module;
-
+//log done
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,9 @@ public class ModuleServiceImpl implements IModuleService{
 	private IElement iElement;
 	@Autowired
 	private IEnseignant iEnseignant;
+	
+	private static final Logger logger=LoggerFactory.getLogger(ModuleServiceImpl.class);
+
 	@Override
 	@Transactional
 	public Module creerModule(Long id, String nom, String semestre,Niveau niveau,Enseignant enseignant) {
@@ -71,6 +76,7 @@ public class ModuleServiceImpl implements IModuleService{
 
 	    // Sauvegarder le module
 	    iModule.save(module);
+	    logger.info("Creation de module avec :"+id+","+nom+","+semestre+","+niveau.getAlias()+"enseignant :"+enseignant.getId());
 
 	    return module; // Retourne true si la création est réussie
 	}
@@ -112,6 +118,7 @@ public class ModuleServiceImpl implements IModuleService{
 
 	    // Sauvegarder le module (automatiquement géré par @Transactional)
 	    iModule.save(module);
+	    logger.info("Modification du module :"+id);
 
 	    return true; // Retourne true si la modification est réussie
 	}
@@ -142,6 +149,7 @@ public class ModuleServiceImpl implements IModuleService{
 
 	    // Supprimer le module
 	    iModule.delete(module);
+	    logger.info("Supression du module :"+id);
 
 	    return true; // Retourne true si la suppression est réussie
 	}
@@ -173,5 +181,7 @@ public class ModuleServiceImpl implements IModuleService{
 	    // Association de l'enseignant au module
 	    module.setEnseignant(enseignant);
 	    iModule.save(module);
+	    logger.info("Association d'enseignant"+enseignant.getId()+" au module :"+module.getNom());
+
 	}
 }

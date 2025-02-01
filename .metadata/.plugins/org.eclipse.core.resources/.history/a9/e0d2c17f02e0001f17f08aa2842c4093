@@ -1,0 +1,23 @@
+package com.example.demo.logging;
+
+import com.example.demo.logging.services.IJournalService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class LogbackConfig {
+
+    private final IJournalService iJournalService;
+
+    // Constructeur avec injection de dépendances Spring
+    public LogbackConfig(IJournalService iJournalService) {
+        this.iJournalService = iJournalService;
+    }
+
+    @Bean
+    public DatabaseAppender databaseAppender() {
+        DatabaseAppender appender = new DatabaseAppender();
+        appender.setiJournalService(iJournalService);  // Injection manuelle du service
+        return appender;
+    }
+}

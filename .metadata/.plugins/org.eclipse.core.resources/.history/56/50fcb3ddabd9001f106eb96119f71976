@@ -1,5 +1,0 @@
-package com.example.demo.services.niveau;
-
-public interface INiveauService {
-
-}

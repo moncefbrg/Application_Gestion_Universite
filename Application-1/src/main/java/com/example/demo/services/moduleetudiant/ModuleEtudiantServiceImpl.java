@@ -1,6 +1,8 @@
 package com.example.demo.services.moduleetudiant;
 
-
+//log done
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,9 @@ public class ModuleEtudiantServiceImpl implements IModuleEtudiantService{
 	private IEtudiant iEtudiant;
 	@Autowired
 	private IModule iModule;
+	
+	private static final Logger logger=LoggerFactory.getLogger(ModuleEtudiantServiceImpl.class);
+
 
 	@Override
 	@Transactional
@@ -59,7 +64,7 @@ public class ModuleEtudiantServiceImpl implements IModuleEtudiantService{
 	    // Ajouter le module à la liste des modules de l'étudiant
 	    etudiantBD.getModules().add(moduleBD);
 	    iEtudiant.save(etudiantBD);  // Sauvegarder l'étudiant avec le module ajouté
-
+	    logger.info("Association du module"+module.getNom()+" au etudiant"+etudiant.getId());
 	    return true;
 	}
 	@Override @Transactional
@@ -90,6 +95,7 @@ public class ModuleEtudiantServiceImpl implements IModuleEtudiantService{
         // Retirer le module de la liste des modules de l'étudiant
         etudiant.getModules().remove(module);
         iEtudiant.save(etudiant); // Sauvegarder l'étudiant avec le module retiré
+	    logger.info("Separation du module"+module.getNom()+" de l' etudiant"+etudiant.getId());
 
         return true;
     }

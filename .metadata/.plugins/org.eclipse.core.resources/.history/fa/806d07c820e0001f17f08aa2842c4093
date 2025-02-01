@@ -1,0 +1,5 @@
+package com.example.demo.logging.aspect;
+
+public class LoggingAspect {
+
+}

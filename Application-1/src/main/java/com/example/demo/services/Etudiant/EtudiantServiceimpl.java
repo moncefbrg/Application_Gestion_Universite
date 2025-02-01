@@ -1,6 +1,9 @@
 package com.example.demo.services.Etudiant;
+//log done
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +32,16 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	private INiveau iNiveau;
 	@Autowired
 	private IClasse iClasse;
+	
+    private static final Logger logger = LoggerFactory.getLogger(EtudiantServiceimpl.class);
 	@Transactional
 	@Override
 	public boolean inscrire(File fichier) throws Exception{
 		List<String> listeTypeColonnes=Arrays.asList("NUMERIC","STRING","STRING","STRING","NUMERIC","STRING");
 		try {
 			if(ifichierexcelservice.checkFormat(fichier, listeTypeColonnes, 6)) {
+				logger.info("inscription avec fichier");
+
 			return inscription(fichier,listeTypeColonnes,6);}else {return false;}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,6 +97,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	            // Sauvegarder l'étudiant dans la base de données
 	            ietudiant.save(etudiant);
 	            System.out.println("Étudiant inscrit : " + etudiant);
+	    		logger.info("Étudiant inscrit : " + etudiant+"au niveau"+idNiveau);
+
 	        } else if ("Reinscription".equalsIgnoreCase(type) || "Réinscription".equalsIgnoreCase(type)) {
 	            // Cas : Reinscription
 	            if (etudiantOpt.isEmpty()) {
@@ -108,6 +117,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	            // Sauvegarder les modifications
 	            ietudiant.save(etudiant);
 	            System.out.println("Étudiant réinscrit : " + etudiant);
+	    		logger.info("Étudiant réinscrit : " + etudiant+"au niveau"+idNiveau);
+
 	        } else {
 	            System.err.println("Type non reconnu : " + type);
 	            return false;
@@ -126,11 +137,14 @@ public class EtudiantServiceimpl implements IEtudiantService{
 	@Override
 	public Etudiant chercherEtudiantById(Long id) {
 		Optional<Etudiant> optionnalEtudiant=Optional.ofNullable(ietudiant.findById(id).orElse(null));
+		logger.info("Étudiant cherche : " +id);
 		return optionnalEtudiant.get();
 	}
 
 	@Override
 	public List<Etudiant> chercherEtudiant(String cne,String nom,String prenom,Long niveau) {
+		logger.info("chercher des etudiants avec : " +cne+","+nom+","+prenom+","+niveau);
+
 		return ietudiant.findByCneOrNomOrPrenomOrNiveauId(cne, nom, prenom, niveau);
 	}
 
@@ -190,6 +204,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 				Optional<Niveau> n=iNiveau.findById(niveau);
 				e1.setNiveau(n.get());
 			}
+			logger.info("Étudiant modifie : " +id+"avec :"+cne+","+nom+","+prenom+","+niveau);
 			ietudiant.save(e1);
 			return e1;
 		}else {
@@ -235,6 +250,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    // Enregistrer l'étudiant
 	    ietudiant.save(etudiant);
+		logger.info("Étudiant ajoute : " + id+","+nom+","+prenom+","+cne+","+aliasNiveau+","+nomClasse);
 
 	    return true; // Retourner true si l'étudiant a été ajouté avec succès
 	}
@@ -259,6 +275,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    // Supprimer l'étudiant
 	    ietudiant.delete(etudiant);
+		logger.info("Étudiant supprime : " + id);
+
 
 	    return true; // Retourne true si la suppression est réussie
 	}
@@ -291,6 +309,7 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    // Sauvegarde des modifications
 	    ietudiant.save(etudiantBD);
+		logger.info("Étudiant"+etudiant.getId()+" associe au classe : "+classe.getNom());
 
 	    return true;
 	}
@@ -324,6 +343,8 @@ public class EtudiantServiceimpl implements IEtudiantService{
 
 	    // Sauvegarde des modifications
 	    ietudiant.save(etudiantBD);
+		logger.info("Étudiant"+etudiant.getId()+" separe au classe : "+classe.getNom());
+
 
 	    return true;
 	}

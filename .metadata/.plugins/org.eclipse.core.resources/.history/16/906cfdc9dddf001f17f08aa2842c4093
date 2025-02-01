@@ -1,0 +1,46 @@
+package com.example.demo.logging;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+import com.example.demo.logging.services.IJournalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DatabaseAppender extends AppenderBase<ILoggingEvent> {
+
+    @Autowired
+    private IJournalService iJournalService;
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        // Récupérer les informations supplémentaires (userId, task, role)
+        Long userId = getUserIdFromContext(); // À implémenter
+        String task = getTaskFromContext();   // À implémenter
+        String role = getRoleFromContext();   // À implémenter
+
+        iJournalService.enregistrerLog(
+            event.getLevel().toString(),
+            event.getFormattedMessage(),
+            event.getLoggerName(),
+            userId,
+            task,
+            role
+        );
+    }
+
+    private Long getUserIdFromContext() {
+        // Implémentez la logique pour récupérer l'ID de l'utilisateur (ex: SecurityContext, ThreadLocal, etc.)
+        return 1L; // Exemple : ID de l'utilisateur actuel
+    }
+
+    private String getTaskFromContext() {
+        // Implémentez la logique pour récupérer la tâche
+        return "Tâche XYZ"; // Exemple : Nom de la tâche
+    }
+
+    private String getRoleFromContext() {
+        // Implémentez la logique pour récupérer le rôle
+        return "ADMIN"; // Exemple : Rôle de l'utilisateur
+    }
+}

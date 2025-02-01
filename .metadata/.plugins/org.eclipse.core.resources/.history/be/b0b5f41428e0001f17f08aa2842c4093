@@ -1,0 +1,6 @@
+package com.example.demo.logging.services;
+
+public interface IJournalService {
+    public void log(String level, String message);
+
+}
